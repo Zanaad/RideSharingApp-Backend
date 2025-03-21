@@ -7,8 +7,11 @@ Since MySQL does not natively support multi-tenancy with an ORM, we have impleme
 Tech Stack
 
 Frontend: React
+
 Backend: Node.js
+
 Database: MySQL
+
 ORM: Sequelize
 
 Database Structure
