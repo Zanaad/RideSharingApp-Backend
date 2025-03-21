@@ -12,7 +12,7 @@ Backend: Node.js
 
 Database: MySQL
 
-ORM: Sequelize
+ORM: Sequelize (installed using `npm install sequelize mysql2`)  
 
 Database Structure
 
