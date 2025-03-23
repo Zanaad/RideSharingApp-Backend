@@ -96,7 +96,7 @@ CREATE TABLE UserRoles (
     role_name VARCHAR(20) UNIQUE NOT NULL
 );
 
-INSERT INTO UserRoles (role_name) VALUES ('passenger'), ('driver');
+INSERT INTO UserRoles (role_name) VALUES ('admin'), ('driver'), ('passenger');
 
 CREATE TABLE TripStatuses (
     status_id INT PRIMARY KEY AUTO_INCREMENT,
