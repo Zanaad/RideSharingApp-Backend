@@ -1,5 +1,6 @@
 package com.ridesharingappbackend.models;
 
+import com.ridesharingappbackend.enums.DriverStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,6 +31,4 @@ public class Driver {
     private DriverStatus status;
 }
 
-enum DriverStatus {
-    AVAILABLE, BUSY, OFFLINE
-}
+

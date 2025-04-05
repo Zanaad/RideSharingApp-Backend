@@ -1,5 +1,7 @@
 package com.ridesharingappbackend.models;
 
+import com.ridesharingappbackend.enums.PaymentMethod;
+import com.ridesharingappbackend.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,10 +40,5 @@ public class Payment {
     private LocalDateTime createdAt = LocalDateTime.now();
 }
 
-enum PaymentMethod {
-    CASH, CARD, WALLET
-}
 
-enum PaymentStatus {
-    PENDING, COMPLETED, FAILED
-}
+

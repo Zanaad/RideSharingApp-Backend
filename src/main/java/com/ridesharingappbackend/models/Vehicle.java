@@ -1,5 +1,6 @@
 package com.ridesharingappbackend.models;
 
+import com.ridesharingappbackend.enums.VehicleType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,6 +34,3 @@ public class Vehicle {
     private String color;
 }
 
-enum VehicleType {
-    SEDAN, SUV, VAN, MOTORBIKE
-}

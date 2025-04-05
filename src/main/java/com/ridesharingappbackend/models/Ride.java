@@ -1,5 +1,6 @@
 package com.ridesharingappbackend.models;
 
+import com.ridesharingappbackend.enums.RideStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -42,6 +43,3 @@ public class Ride {
     private double fare;
 }
 
-enum RideStatus {
-    REQUESTED, ACCEPTED, ONGOING, COMPLETED, CANCELLED
-}

@@ -1,6 +1,7 @@
 package com.ridesharingappbackend.models;
 
 
+import com.ridesharingappbackend.enums.NotificationType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -34,6 +35,3 @@ public class Notifications {
     private LocalDateTime createdAt = LocalDateTime.now();
 }
 
-enum NotificationType {
-    RIDE_UPDATE, PAYMENT, GENERAL
-}
