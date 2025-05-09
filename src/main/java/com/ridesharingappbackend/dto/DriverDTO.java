@@ -16,4 +16,5 @@ public class DriverDTO {
     private String licenseNumber;
     private float rating;
     private DriverStatus status;
+    private Integer companyId;
 }

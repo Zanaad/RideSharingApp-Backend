@@ -32,5 +32,9 @@ public class Vehicle {
     private String plateNumber;
 
     private String color;
+
+    @ManyToOne
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
 }
 

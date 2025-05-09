@@ -24,10 +24,6 @@ public class UserService {
         return userRepository.findById(id);
     }
 
-    public User createUser(User user) {
-        return userRepository.save(user);
-    }
-
     public User updateUser(Integer id, User updatedUser) {
         return userRepository.findById(id)
                 .map(user -> {

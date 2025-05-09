@@ -30,8 +30,11 @@ public class Rating {
     @ManyToOne
     @JoinColumn(name = "driver_id", nullable = false)
     private Driver driver;
-
     private int rating;
     private String review;
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @ManyToOne
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
 }

@@ -41,5 +41,9 @@ public class Ride {
 
     @Column(nullable = false)
     private double fare;
+
+    @ManyToOne
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
 }
 

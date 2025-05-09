@@ -29,6 +29,10 @@ public class Driver {
 
     @Enumerated(EnumType.STRING)
     private DriverStatus status;
+
+    @ManyToOne
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
 }
 
 

@@ -20,4 +20,5 @@ public class UserDTO {
     private String phoneNumber;
     private UserType userType;
     private LocalDateTime createdAt;
+    private Integer companyId;
 }

@@ -38,6 +38,10 @@ public class Payment {
     private PaymentStatus paymentStatus;
 
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @ManyToOne
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
 }
 
 

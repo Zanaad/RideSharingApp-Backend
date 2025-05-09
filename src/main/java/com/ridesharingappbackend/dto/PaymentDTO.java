@@ -21,5 +21,6 @@ public class PaymentDTO {
     private PaymentMethod paymentMethod;
     private PaymentStatus paymentStatus;
     private LocalDateTime createAt;
+    private Integer companyId;
 }
 

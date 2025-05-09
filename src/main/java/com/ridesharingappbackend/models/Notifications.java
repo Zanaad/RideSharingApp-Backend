@@ -33,5 +33,9 @@ public class Notifications {
     private boolean isRead = false;
 
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @ManyToOne
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
 }
 

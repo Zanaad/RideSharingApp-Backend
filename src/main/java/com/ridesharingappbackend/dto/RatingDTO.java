@@ -19,4 +19,5 @@ public class RatingDTO {
     private int rating;
     private String review;
     private LocalDateTime createdAt;
+    private Integer companyId;
 }

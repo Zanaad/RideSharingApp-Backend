@@ -27,4 +27,8 @@ public class RideTracking {
     private double longitude;
 
     private LocalDateTime timestamp = LocalDateTime.now();
+
+    @ManyToOne
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
 }

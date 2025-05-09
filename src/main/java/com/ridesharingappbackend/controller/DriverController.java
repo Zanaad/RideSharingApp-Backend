@@ -28,11 +28,6 @@ public class DriverController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    public Driver createDriver(@RequestBody Driver driver) {
-        return driverService.createDriver(driver);
-    }
-
     @PutMapping("/{id}")
     public ResponseEntity<Driver> updateDriver(@PathVariable Integer id, @RequestBody Driver updatedDriver) {
         Driver driver = driverService.updateDriver(id, updatedDriver);
