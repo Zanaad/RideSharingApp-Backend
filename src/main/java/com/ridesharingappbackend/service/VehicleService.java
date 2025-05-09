@@ -35,13 +35,15 @@ public class VehicleService {
     public Vehicle updateVehicle(Integer id, Vehicle updatedVehicle) {
         return vehicleRepository.findById(id)
                 .map(vehicle -> {
-                    vehicle.setDriver(updatedVehicle.getDriver());
-                    vehicle.setMake(updatedVehicle.getMake());
+                    vehicle.setBrand(updatedVehicle.getBrand());
                     vehicle.setModel(updatedVehicle.getModel());
-                    vehicle.setYear(updatedVehicle.getYear());
-                    vehicle.setLicensePlate(updatedVehicle.getLicensePlate());
+                    vehicle.setColor(updatedVehicle.getColor());
+                    vehicle.setPlateNumber(updatedVehicle.getPlateNumber());
+                    vehicle.setVehicleType(updatedVehicle.getVehicleType());
+                    vehicle.setDriver(updatedVehicle.getDriver());
                     return vehicleRepository.save(vehicle);
-                }).orElse(null);
+                })
+                .orElse(null);
     }
 
     public boolean deleteVehicle(Integer id) {

@@ -1,7 +1,7 @@
-package com.ridesharingappbackend.controllers;
+package com.ridesharingappbackend.controller;
 
 import com.ridesharingappbackend.models.Admin;
-import com.ridesharingappbackend.services.AdminService;
+import com.ridesharingappbackend.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
