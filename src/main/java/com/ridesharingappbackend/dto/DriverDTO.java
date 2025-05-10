@@ -13,7 +13,6 @@ import lombok.Setter;
 public class DriverDTO {
     private Integer id;
     private Integer userId;
-    private String licenseNumber;
     private float rating;
     private DriverStatus status;
     private Integer companyId;

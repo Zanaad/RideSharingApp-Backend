@@ -28,14 +28,12 @@ public class DriverService {
     }
 
     public Driver updateDriver(Integer id, Driver updatedDriver) {
-        return driverRepository.findById(id)
-                .map(driver -> {
-                    driver.setLicenseNumber(updatedDriver.getLicenseNumber());
-                    driver.setRating(updatedDriver.getRating());
-                    driver.setStatus(updatedDriver.getStatus());
-                    driver.setUser(updatedDriver.getUser());
-                    return driverRepository.save(driver);
-                }).orElse(null);
+        return driverRepository.findById(id).map(driver -> {
+            driver.setRating(updatedDriver.getRating());
+            driver.setStatus(updatedDriver.getStatus());
+            driver.setUser(updatedDriver.getUser());
+            return driverRepository.save(driver);
+        }).orElse(null);
     }
 
     public void deleteDriver(Integer id) {

@@ -40,9 +40,5 @@ public class User {
 
     @CreationTimestamp
     @Column(updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @ManyToOne
-    @JoinColumn(name = "company_id", nullable = false)
-    private Company company;
+    private LocalDateTime createdAt;
 }

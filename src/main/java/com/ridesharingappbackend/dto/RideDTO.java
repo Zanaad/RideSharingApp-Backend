@@ -24,5 +24,5 @@ public class RideDTO {
     private LocalDateTime createdAt;
     private LocalDateTime completedAt;
     private double fare;
-    private Integer companyId;
+    private LocalDateTime pickupTime;
 }

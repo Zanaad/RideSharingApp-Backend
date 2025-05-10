@@ -39,7 +39,7 @@ public class NotificationsService {
     public Notifications markAsRead(Integer id) {
         return notificationRepository.findById(id)
                 .map(notification -> {
-                    notification.setRead(true);
+                    notification.setIsRead(true);
                     return notificationRepository.save(notification);
                 }).orElse(null);
     }

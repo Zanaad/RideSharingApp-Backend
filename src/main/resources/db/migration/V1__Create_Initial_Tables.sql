@@ -98,5 +98,3 @@ create table notifications
     primary key (id),
     CONSTRAINT notifications_id_fk FOREIGN KEY (user_id) REFERENCES users (id)
 );
-
-

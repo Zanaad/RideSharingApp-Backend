@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -16,34 +17,44 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Ride {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne
-    @JoinColumn(name = "passenger_id", nullable = false)
-    private User passenger;
+    @Column(name = "completed_at")
+    private LocalDateTime completedAt;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private double distance;
+
+    @Column(name = "drop_off_location")
+    private String dropOffLocation;
+
+    @Column(name = "estimated_fare", nullable = false)
+    private double estimatedFare;
+
+    @Column(nullable = false)
+    private double fare;
+
+    @Column(name = "pickup_location")
+    private String pickupLocation;
+
+    @Enumerated(EnumType.STRING)
+    private RideStatus status;
 
     @ManyToOne
     @JoinColumn(name = "driver_id")
     private Driver driver;
 
-    private String pickupLocation;
-    private String dropOffLocation;
-    private double distance;
-    private double estimatedFare;
-
-    @Enumerated(EnumType.STRING)
-    private RideStatus status = RideStatus.REQUESTED;
-
-    private LocalDateTime createdAt = LocalDateTime.now();
-    private LocalDateTime completedAt;
-
-    @Column(nullable = false)
-    private double fare;
-
     @ManyToOne
-    @JoinColumn(name = "company_id", nullable = false)
-    private Company company;
-}
+    @JoinColumn(name = "passenger_id", nullable = false)
+    private User passenger;
 
+    @Column(name = "pickup_time")
+    private LocalDateTime pickupTime;
+}
