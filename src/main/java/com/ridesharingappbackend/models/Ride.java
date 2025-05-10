@@ -57,4 +57,8 @@ public class Ride {
 
     @Column(name = "pickup_time")
     private LocalDateTime pickupTime;
+
+    @ManyToOne
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
 }

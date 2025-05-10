@@ -35,4 +35,8 @@ public class Vehicle {
     @OneToOne
     @JoinColumn(name = "driver_id", unique = true)
     private Driver driver;
+
+    @ManyToOne
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
 }

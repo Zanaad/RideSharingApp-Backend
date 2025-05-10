@@ -34,4 +34,8 @@ public class DriverLicense {
 
     @Column(name = "expiration_date")
     private LocalDateTime expirationDate;
+
+    @ManyToOne
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
 }

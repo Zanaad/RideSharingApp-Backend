@@ -39,4 +39,8 @@ public class ChatMessage {
     @ManyToOne
     @JoinColumn(name = "ride_id")
     private Ride ride;
+
+    @ManyToOne
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
 }

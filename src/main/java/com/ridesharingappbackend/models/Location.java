@@ -20,4 +20,8 @@ public class Location {
     private double longitude;
 
     private String address;
+
+    @ManyToOne
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
 }

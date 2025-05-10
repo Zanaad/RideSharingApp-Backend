@@ -41,4 +41,8 @@ public class Rating {
     @OneToOne
     @JoinColumn(name = "ride_id", unique = true)
     private Ride ride;
+
+    @ManyToOne
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
 }
