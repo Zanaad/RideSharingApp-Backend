@@ -22,9 +22,6 @@ public class Driver {
     @JoinColumn(name = "user_id", unique = true)
     private User user;
 
-    @Column(nullable = false, unique = true)
-    private String licenseNumber;
-
     private float rating;
 
     @Enumerated(EnumType.STRING)

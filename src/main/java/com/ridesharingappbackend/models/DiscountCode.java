@@ -1,12 +1,16 @@
 package com.ridesharingappbackend.models;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "discount_codes")
+@Table(name = "discount_code")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,10 +21,17 @@ public class DiscountCode {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(unique = true)
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false, unique = true)
     private String code;
 
-    private double discountPercent;
+    @Column(name = "discount_percent", nullable = false)
+    private Integer discountPercent;
 
-    private LocalDate expirationDate;
+    @Column(name = "expiration_date")
+    private LocalDateTime expirationDate;
+
 }
