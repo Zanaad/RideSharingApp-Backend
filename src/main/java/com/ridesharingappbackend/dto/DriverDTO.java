@@ -15,4 +15,5 @@ public class DriverDTO {
     private Integer userId;
     private float rating;
     private DriverStatus status;
+    private Integer companyId;
 }

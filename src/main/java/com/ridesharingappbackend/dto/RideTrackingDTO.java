@@ -17,4 +17,5 @@ public class RideTrackingDTO {
     private double latitude;
     private double longitude;
     private LocalDateTime timestamp;
+    private Integer companyId;
 }

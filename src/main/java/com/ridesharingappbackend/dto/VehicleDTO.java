@@ -18,4 +18,5 @@ public class VehicleDTO {
     private String model;
     private String plateNumber;
     private String color;
+    private Integer companyId;
 }
