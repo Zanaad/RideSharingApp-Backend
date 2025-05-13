@@ -1,8 +1,10 @@
 package com.ridesharingappbackend.controller;
 
+import com.ridesharingappbackend.dto.UserDTO;
 import com.ridesharingappbackend.models.User;
 import com.ridesharingappbackend.service.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,26 +18,27 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public List<User> getAllUsers() {
+    public List<UserDTO> getAllUsers() {
         return userService.getAllUsers();
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Integer id) {
+    public ResponseEntity<UserDTO> getUserById(@PathVariable Integer id) {
         return userService.getUserById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Integer id, @RequestBody User updatedUser) {
-        User user = userService.updateUser(id, updatedUser);
-        if (user != null) {
-            return ResponseEntity.ok(user);
+    public ResponseEntity<UserDTO> updateUser(@PathVariable Integer id, @RequestBody UserDTO updatedUserDto) {
+        UserDTO userDto = userService.updateUser(id, updatedUserDto);
+        if (userDto != null) {
+            return ResponseEntity.ok(userDto);
         }
         return ResponseEntity.notFound().build();
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Integer id) {
         boolean deleted = userService.deleteUser(id);

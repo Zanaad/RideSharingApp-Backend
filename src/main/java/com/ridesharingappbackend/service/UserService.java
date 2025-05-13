@@ -1,40 +1,43 @@
 package com.ridesharingappbackend.service;
 
+import com.ridesharingappbackend.dto.UserDTO;
 import com.ridesharingappbackend.models.User;
 import com.ridesharingappbackend.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import com.ridesharingappbackend.mappers.UserMapper;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, UserMapper userMapper) {
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserDTO> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(userMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
-    public Optional<User> getUserById(Integer id) {
-        return userRepository.findById(id);
+    public Optional<UserDTO> getUserById(Integer id) {
+        return userRepository.findById(id).map(userMapper::toDTO);
     }
 
-    public User updateUser(Integer id, User updatedUser) {
+    public UserDTO updateUser(Integer id, UserDTO updatedUserDto) {
         return userRepository.findById(id)
                 .map(user -> {
-                    user.setFirstName(updatedUser.getFirstName());
-                    user.setLastName(updatedUser.getLastName());
-                    user.setEmail(updatedUser.getEmail());
-                    user.setPassword(updatedUser.getPassword());
-                    user.setPhoneNumber(updatedUser.getPhoneNumber());
-                    user.setUserType(updatedUser.getUserType());
-                    return userRepository.save(user);
-                }).orElse(null);
+                    userMapper.updateUserFromDto(updatedUserDto, user);
+                    return userMapper.toDTO(userRepository.save(user));
+                })
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     public boolean deleteUser(Integer id) {
