@@ -1,8 +1,7 @@
 package com.ridesharingappbackend.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ridesharingappbackend.dto.ApiError;
 import com.ridesharingappbackend.security.JwtFilter;
+import com.ridesharingappbackend.security.AuthorizationFilter;
 import com.ridesharingappbackend.utils.ErrorResponseWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -17,8 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import java.time.LocalDateTime;
-
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -27,11 +24,14 @@ public class SecurityConfig {
     @Autowired
     private JwtFilter jwtFilter;
 
+    @Autowired
+    private AuthorizationFilter authorizationFilter;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .httpBasic(AbstractHttpConfigurer::disable) // Disable Basic Auth fallback
+                .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/**",
@@ -44,13 +44,14 @@ public class SecurityConfig {
                 )
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint((req, res, ex) ->
-                            ErrorResponseWriter.write(res, HttpStatus.UNAUTHORIZED, "Authentication required.")
+                                ErrorResponseWriter.write(res, HttpStatus.UNAUTHORIZED, "Authentication required.")
                         )
                         .accessDeniedHandler((req, res, ex) ->
                                 ErrorResponseWriter.write(res, HttpStatus.FORBIDDEN, "You do not have permission to access this resource.")
                         )
                 )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(authorizationFilter, JwtFilter.class);
 
         return http.build();
     }

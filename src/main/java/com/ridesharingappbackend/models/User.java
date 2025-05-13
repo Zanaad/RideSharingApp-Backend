@@ -34,9 +34,14 @@ public class User {
     private String password;
 
     private String phoneNumber;
-
+// we should remove userType
     @Enumerated(EnumType.STRING)
-    private UserType userType;
+   private UserType userType;
+
+
+   @ManyToOne()
+   @JoinColumn(name = "role_id")
+   private Role role;
 
     @CreationTimestamp
     @Column(updatable = false)
