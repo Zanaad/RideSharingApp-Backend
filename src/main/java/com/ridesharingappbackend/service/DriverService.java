@@ -1,39 +1,48 @@
 package com.ridesharingappbackend.service;
 
+import com.ridesharingappbackend.dto.DriverDTO;
+import com.ridesharingappbackend.mappers.DriverMapper;
 import com.ridesharingappbackend.models.Driver;
 import com.ridesharingappbackend.repository.DriverRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class DriverService {
+
     private final DriverRepository driverRepository;
+    private final DriverMapper driverMapper;
 
-    public DriverService(DriverRepository driverRepository) {
+    public DriverService(DriverRepository driverRepository, DriverMapper driverMapper) {
         this.driverRepository = driverRepository;
+        this.driverMapper = driverMapper;
     }
 
-    public List<Driver> getAllDrivers() {
-        return driverRepository.findAll();
+    public List<DriverDTO> getAllDrivers() {
+        return driverRepository.findAll().stream()
+                .map(driverMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
-    public Optional<Driver> getDriverById(Integer id) {
-        return driverRepository.findById(id);
+    public Optional<DriverDTO> getDriverById(Integer id) {
+        return driverRepository.findById(id).map(driverMapper::toDTO);
     }
 
-    public Driver createDriver(Driver driver) {
-        return driverRepository.save(driver);
+    public DriverDTO createDriver(DriverDTO dto) {
+        Driver driver = driverMapper.toEntity(dto);
+        return driverMapper.toDTO(driverRepository.save(driver));
     }
 
-    public Driver updateDriver(Integer id, Driver updatedDriver) {
-        return driverRepository.findById(id).map(driver -> {
-            driver.setRating(updatedDriver.getRating());
-            driver.setStatus(updatedDriver.getStatus());
-            driver.setUser(updatedDriver.getUser());
-            return driverRepository.save(driver);
-        }).orElse(null);
+    public DriverDTO updateDriver(Integer id, DriverDTO updatedDto) {
+        return driverRepository.findById(id)
+                .map(existing -> {
+                    driverMapper.updateDriverFromDto(updatedDto, existing);
+                    return driverMapper.toDTO(driverRepository.save(existing));
+                })
+                .orElseThrow(() -> new RuntimeException("Driver not found"));
     }
 
     public void deleteDriver(Integer id) {

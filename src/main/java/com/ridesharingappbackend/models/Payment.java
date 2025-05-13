@@ -1,6 +1,7 @@
 package com.ridesharingappbackend.models;
 
 import com.ridesharingappbackend.enums.PaymentMethod;
+import com.ridesharingappbackend.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,8 +34,9 @@ public class Payment {
     @Column(name = "payment_method")
     private PaymentMethod paymentMethod;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "payment_status")
-    private Boolean paymentStatus;
+    private PaymentStatus paymentStatus;
 
     @OneToOne
     @JoinColumn(name = "ride_id", unique = true)

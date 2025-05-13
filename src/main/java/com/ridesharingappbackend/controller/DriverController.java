@@ -1,15 +1,17 @@
 package com.ridesharingappbackend.controller;
 
-import com.ridesharingappbackend.models.Driver;
+import com.ridesharingappbackend.dto.DriverDTO;
 import com.ridesharingappbackend.service.DriverService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/drivers")
 public class DriverController {
+
     private final DriverService driverService;
 
     public DriverController(DriverService driverService) {
@@ -17,23 +19,28 @@ public class DriverController {
     }
 
     @GetMapping
-    public List<Driver> getAllDrivers() {
+    public List<DriverDTO> getAllDrivers() {
         return driverService.getAllDrivers();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Driver> getDriverById(@PathVariable Integer id) {
-        return driverService.getDriverById(id)
-                .map(ResponseEntity::ok)
+    public ResponseEntity<DriverDTO> getDriverById(@PathVariable Integer id) {
+        Optional<DriverDTO> driver = driverService.getDriverById(id);
+        return driver.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PostMapping
+    public DriverDTO createDriver(@RequestBody DriverDTO dto) {
+        return driverService.createDriver(dto);
+    }
+
     @PutMapping("/{id}")
-    public ResponseEntity<Driver> updateDriver(@PathVariable Integer id, @RequestBody Driver updatedDriver) {
-        Driver driver = driverService.updateDriver(id, updatedDriver);
-        if (driver != null) {
-            return ResponseEntity.ok(driver);
-        } else {
+    public ResponseEntity<DriverDTO> updateDriver(@PathVariable Integer id, @RequestBody DriverDTO dto) {
+        try {
+            DriverDTO updated = driverService.updateDriver(id, dto);
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
