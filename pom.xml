@@ -128,6 +128,11 @@
             <version>5.10.1</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope> <!-- Only needed during tests -->
+        </dependency>
 
     </dependencies>
 
