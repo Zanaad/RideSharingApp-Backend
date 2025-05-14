@@ -1,6 +1,5 @@
 package com.ridesharingappbackend.dto;
 
-import com.ridesharingappbackend.enums.UserType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,7 +17,7 @@ public class UserDTO {
     private String lastName;
     private String email;
     private String phoneNumber;
-    private UserType userType;
+    private String roleId;
+    private String companyId;
     private LocalDateTime createdAt;
-    private Integer companyId;
 }

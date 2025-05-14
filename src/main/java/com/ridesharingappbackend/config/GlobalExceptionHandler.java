@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
 
         if (isFrameworkIssue) {
             System.err.println("[IGNORED Framework Error] " + className + ": " + ex.getMessage());
-            return ErrorResponseWriter.toResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Internal framework error");
+            return ErrorResponseWriter.toResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error: " + ex.getMessage());
         }
 
         ex.printStackTrace();
