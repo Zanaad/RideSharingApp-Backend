@@ -4,7 +4,6 @@ import com.ridesharingappbackend.dto.PaymentDTO;
 import com.ridesharingappbackend.service.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -75,13 +74,11 @@ public class PaymentController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'COMPANY_ADMIN')")
     public PaymentDTO createPayment(@RequestBody PaymentDTO paymentDTO) {
         return paymentService.createPayment(paymentDTO);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'COMPANY_ADMIN')")
     public ResponseEntity<PaymentDTO> updatePayment(
             @PathVariable Integer id,
             @RequestBody PaymentDTO paymentDTO,
@@ -93,7 +90,6 @@ public class PaymentController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'COMPANY_ADMIN')")
     public ResponseEntity<Void> deletePayment(
             @PathVariable Integer id,
             HttpServletRequest request) {
