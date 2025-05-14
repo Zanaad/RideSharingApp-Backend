@@ -84,5 +84,5 @@ CREATE TABLE driver_license
 );
 
 
-ALTER TABLE drivers DROP COLUMN licenseNumber;
+ALTER TABLE drivers DROP COLUMN license_number;
 ALTER TABLE rides ADD COLUMN pickup_time DATETIME(6);

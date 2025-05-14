@@ -1,7 +1,8 @@
 package com.ridesharingappbackend.controller;
 
-import com.ridesharingappbackend.models.Rating;
+import com.ridesharingappbackend.dto.RatingDTO;
 import com.ridesharingappbackend.service.RatingService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,22 +19,24 @@ public class RatingController {
     }
 
     @GetMapping
-    public List<Rating> getAllRatings() {
+    public List<RatingDTO> getAllRatings() {
         return ratingService.getAllRatings();
     }
 
     @GetMapping("/{id}")
-    public Optional<Rating> getRatingById(@PathVariable Integer id) {
-        return ratingService.getRatingById(id);
+    public ResponseEntity<RatingDTO> getRatingById(@PathVariable Integer id) {
+        Optional<RatingDTO> rating = ratingService.getRatingById(id);
+        return rating.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public Rating createRating(@RequestBody Rating rating) {
-        return ratingService.createRating(rating);
+    public RatingDTO createRating(@RequestBody RatingDTO ratingDTO) {
+        return ratingService.createRating(ratingDTO);
     }
 
     @DeleteMapping("/{id}")
-    public boolean deleteRating(@PathVariable Integer id) {
-        return ratingService.deleteRating(id);
+    public ResponseEntity<Void> deleteRating(@PathVariable Integer id) {
+        boolean deleted = ratingService.deleteRating(id);
+        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 }

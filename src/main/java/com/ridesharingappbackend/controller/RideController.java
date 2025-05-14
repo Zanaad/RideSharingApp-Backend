@@ -1,6 +1,6 @@
 package com.ridesharingappbackend.controller;
 
-import com.ridesharingappbackend.models.Ride;
+import com.ridesharingappbackend.dto.RideDTO;
 import com.ridesharingappbackend.service.RideService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,33 +19,30 @@ public class RideController {
     }
 
     @GetMapping
-    public List<Ride> getAllRides() {
+    public List<RideDTO> getAllRides() {
         return rideService.getAllRides();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Ride> getRideById(@PathVariable Integer id) {
-        Optional<Ride> ride = rideService.getRideById(id);
+    public ResponseEntity<RideDTO> getRideById(@PathVariable Integer id) {
+        Optional<RideDTO> ride = rideService.getRideById(id);
         return ride.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/passenger/{passengerId}")
-    public List<Ride> getRidesByPassengerId(@PathVariable Integer passengerId) {
+    public List<RideDTO> getRidesByPassengerId(@PathVariable Integer passengerId) {
         return rideService.getRidesByPassengerId(passengerId);
     }
 
     @PostMapping
-    public Ride createRide(@RequestBody Ride ride) {
-        return rideService.createRide(ride);
+    public RideDTO createRide(@RequestBody RideDTO rideDTO) {
+        return rideService.createRide(rideDTO);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRide(@PathVariable Integer id) {
         boolean deleted = rideService.deleteRide(id);
-        if (deleted) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 }
