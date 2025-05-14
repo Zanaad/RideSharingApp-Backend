@@ -36,12 +36,18 @@ public class User {
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private UserType userType;
 
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
+
+    public Integer getCompanyId() {
+        return this.company != null ? this.company.getId() : null;
+    }
 }

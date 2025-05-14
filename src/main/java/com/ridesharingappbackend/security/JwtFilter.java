@@ -17,7 +17,11 @@ import java.util.List;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
-    private JwtService jwtService;
+    private final JwtService jwtService;
+
+    public JwtFilter(JwtService jwtService) {
+        this.jwtService = jwtService;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -30,20 +34,22 @@ public class JwtFilter extends OncePerRequestFilter {
                 String token = authHeader.substring(7);
                 Claims claims = jwtService.extractClaims(token);
 
-                String email = claims.getSubject();
-                String role = (String) claims.get("userType");
 
+                Integer companyId = claims.get("companyId", Integer.class);
+                request.setAttribute("companyId", companyId);
+
+                String email = claims.getSubject();
+                String role = claims.get("userType", String.class);
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(email, null,
                                 List.of(new SimpleGrantedAuthority("ROLE_" + role)));
-
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+
             } catch (Exception ex) {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid Token");
                 return;
             }
         }
-
         filterChain.doFilter(request, response);
     }
 }

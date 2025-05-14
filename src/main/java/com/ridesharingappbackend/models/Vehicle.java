@@ -8,21 +8,18 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "vehicle")
+@Table(name = "vehicles")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Vehicle {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     private String brand;
-
     private String color;
-
     private String model;
 
     @Column(name = "plate_number", nullable = false, unique = true)
@@ -39,4 +36,8 @@ public class Vehicle {
     @ManyToOne
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
+
+    public Integer getCompanyId() {
+        return this.company != null ? this.company.getId() : null;
+    }
 }

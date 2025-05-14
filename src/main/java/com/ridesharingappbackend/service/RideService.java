@@ -1,6 +1,7 @@
 package com.ridesharingappbackend.service;
 
 import com.ridesharingappbackend.dto.RideDTO;
+import com.ridesharingappbackend.enums.RideStatus;
 import com.ridesharingappbackend.mappers.RideMapper;
 import com.ridesharingappbackend.models.Ride;
 import com.ridesharingappbackend.repository.RideRepository;
@@ -12,7 +13,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class RideService {
-
     private final RideRepository rideRepository;
     private final RideMapper rideMapper;
 
@@ -34,6 +34,30 @@ public class RideService {
 
     public List<RideDTO> getRidesByPassengerId(Integer passengerId) {
         return rideRepository.findByPassengerId(passengerId).stream()
+                .map(rideMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<RideDTO> getRidesByCompany(Integer companyId) {
+        return rideRepository.findByCompanyId(companyId).stream()
+                .map(rideMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<RideDTO> getRidesByCompanyAndStatus(Integer companyId, RideStatus status) {
+        return rideRepository.findByCompanyIdAndStatus(companyId, status).stream()
+                .map(rideMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<RideDTO> getRidesByCompanyAndDriver(Integer companyId, Integer driverId) {
+        return rideRepository.findByCompanyAndDriver(companyId, driverId).stream()
+                .map(rideMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<RideDTO> getRidesByCompanyAndPassenger(Integer companyId, Integer passengerId) {
+        return rideRepository.findByCompanyAndPassenger(companyId, passengerId).stream()
                 .map(rideMapper::toDTO)
                 .collect(Collectors.toList());
     }

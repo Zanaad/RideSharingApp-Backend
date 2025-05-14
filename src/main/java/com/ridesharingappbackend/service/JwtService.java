@@ -12,15 +12,15 @@ import java.util.Date;
 
 @Service
 public class JwtService {
-    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS512); // 512-bit
+    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS512);
 
     public String generateToken(User user) {
         return Jwts.builder()
                 .setSubject(user.getEmail())
                 .claim("userType", user.getUserType().name())
-                .claim("companyId", user.getCompany().getId())
+                .claim("companyId", user.getCompany().getId()) // Ruaj companyId në token
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 day
+                .setExpiration(new Date(System.currentTimeMillis() + 86400000))
                 .signWith(key)
                 .compact();
     }
@@ -31,5 +31,10 @@ public class JwtService {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    public Integer getCompanyIdFromToken(String token) {
+        Claims claims = extractClaims(token);
+        return claims.get("companyId", Integer.class);
     }
 }

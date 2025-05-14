@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Rating {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -45,4 +44,8 @@ public class Rating {
     @ManyToOne
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
+
+    public Integer getCompanyId() {
+        return this.company != null ? this.company.getId() : null;
+    }
 }

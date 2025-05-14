@@ -4,14 +4,12 @@ import com.ridesharingappbackend.dto.UserDTO;
 import com.ridesharingappbackend.mappers.UserMapper;
 import com.ridesharingappbackend.repository.UserRepository;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class UserService {
-
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
@@ -20,8 +18,18 @@ public class UserService {
         this.userMapper = userMapper;
     }
 
+
+    public List<UserDTO> getAllUsersByCompany(Integer companyId) {
+        return userRepository.findByCompanyId(companyId).stream()
+                .map(userMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+
     public List<UserDTO> getAllUsers() {
-        return userRepository.findAll().stream().map(userMapper::toDTO).collect(Collectors.toList());
+        return userRepository.findAll().stream()
+                .map(userMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     public Optional<UserDTO> getUserById(Integer id) {
@@ -29,10 +37,12 @@ public class UserService {
     }
 
     public UserDTO updateUser(Integer id, UserDTO updatedUserDto) {
-        return userRepository.findById(id).map(user -> {
-            userMapper.updateUserFromDto(updatedUserDto, user);
-            return userMapper.toDTO(userRepository.save(user));
-        }).orElseThrow(() -> new RuntimeException("User not found"));
+        return userRepository.findById(id)
+                .map(user -> {
+                    userMapper.updateUserFromDto(updatedUserDto, user);
+                    return userMapper.toDTO(userRepository.save(user));
+                })
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     public boolean deleteUser(Integer id) {

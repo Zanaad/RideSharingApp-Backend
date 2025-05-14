@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class DriverService {
-
     private final DriverRepository driverRepository;
     private final DriverMapper driverMapper;
 
@@ -21,11 +20,13 @@ public class DriverService {
         this.driverMapper = driverMapper;
     }
 
-    public List<DriverDTO> getAllDrivers() {
-        return driverRepository.findAll().stream()
+
+    public List<DriverDTO> getAllDriversByCompany(Integer companyId) {
+        return driverRepository.findByCompanyId(companyId).stream()
                 .map(driverMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
 
     public Optional<DriverDTO> getDriverById(Integer id) {
         return driverRepository.findById(id).map(driverMapper::toDTO);

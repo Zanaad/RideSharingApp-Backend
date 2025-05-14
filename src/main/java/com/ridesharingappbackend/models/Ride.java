@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Ride {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -47,18 +46,22 @@ public class Ride {
     @Enumerated(EnumType.STRING)
     private RideStatus status;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "driver_id")
     private Driver driver;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "passenger_id", nullable = false)
     private User passenger;
 
     @Column(name = "pickup_time")
     private LocalDateTime pickupTime;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
+
+    public Integer getCompanyId() {
+        return this.company != null ? this.company.getId() : null;
+    }
 }

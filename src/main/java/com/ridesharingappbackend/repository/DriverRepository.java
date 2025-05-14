@@ -10,6 +10,6 @@ import java.util.List;
 @Repository
 public interface DriverRepository extends JpaRepository<Driver, Integer> {
     Driver findByUserId(Integer userId);
-
     List<Driver> findByStatus(DriverStatus status);
+    List<Driver> findByCompanyId(Integer companyId);
 }

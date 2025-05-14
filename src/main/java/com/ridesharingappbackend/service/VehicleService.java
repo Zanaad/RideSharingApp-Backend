@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class VehicleService {
-
     private final VehicleRepository vehicleRepository;
     private final VehicleMapper vehicleMapper;
 
@@ -21,12 +20,29 @@ public class VehicleService {
         this.vehicleMapper = vehicleMapper;
     }
 
-    public List<VehicleDTO> getAllVehicles() {
-        return vehicleRepository.findAll().stream().map(vehicleMapper::toDTO).collect(Collectors.toList());
+    public List<VehicleDTO> getAllVehicles(Integer companyId) {
+        if (companyId != null) {
+            return getVehiclesByCompanyId(companyId);
+        }
+        return vehicleRepository.findAll().stream()
+                .map(vehicleMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<VehicleDTO> getVehiclesByCompanyId(Integer companyId) {
+        return vehicleRepository.findByCompanyId(companyId).stream()
+                .map(vehicleMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     public Optional<VehicleDTO> getVehicleById(Integer id) {
-        return vehicleRepository.findById(id).map(vehicleMapper::toDTO);
+        return vehicleRepository.findById(id)
+                .map(vehicleMapper::toDTO);
+    }
+
+    public Optional<VehicleDTO> getVehicleByIdAndCompanyId(Integer id, Integer companyId) {
+        return vehicleRepository.findByIdAndCompanyId(id, companyId)
+                .map(vehicleMapper::toDTO);
     }
 
     public VehicleDTO getVehicleByDriverId(Integer driverId) {
@@ -40,10 +56,12 @@ public class VehicleService {
     }
 
     public VehicleDTO updateVehicle(Integer id, VehicleDTO updatedDto) {
-        return vehicleRepository.findById(id).map(existing -> {
-            vehicleMapper.updateVehicleFromDto(updatedDto, existing);
-            return vehicleMapper.toDTO(vehicleRepository.save(existing));
-        }).orElseThrow(() -> new RuntimeException("Vehicle not found"));
+        return vehicleRepository.findById(id)
+                .map(existing -> {
+                    vehicleMapper.updateVehicleFromDto(updatedDto, existing);
+                    return vehicleMapper.toDTO(vehicleRepository.save(existing));
+                })
+                .orElseThrow(() -> new RuntimeException("Vehicle not found"));
     }
 
     public boolean deleteVehicle(Integer id) {
@@ -52,5 +70,9 @@ public class VehicleService {
             return true;
         }
         return false;
+    }
+
+    public boolean existsByIdAndCompanyId(Integer id, Integer companyId) {
+        return vehicleRepository.existsByIdAndCompanyId(id, companyId);
     }
 }
