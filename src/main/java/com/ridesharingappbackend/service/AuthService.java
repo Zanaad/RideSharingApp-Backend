@@ -6,6 +6,7 @@ import com.ridesharingappbackend.dto.SignupRequest;
 import com.ridesharingappbackend.exceptions.DuplicateUserException;
 import com.ridesharingappbackend.exceptions.InvalidCredentialsException;
 import com.ridesharingappbackend.exceptions.ResourceNotFoundException;
+import com.ridesharingappbackend.mappers.UserMapper;
 import com.ridesharingappbackend.models.Company;
 import com.ridesharingappbackend.models.Role;
 import com.ridesharingappbackend.models.User;
@@ -23,35 +24,39 @@ public class AuthService {
 
     @Autowired
     private UserRepository userRepo;
+
     @Autowired
     private CompanyRepository companyRepo;
+
     @Autowired
     private RoleRepository roleRepo;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
+
     @Autowired
     private JwtService jwtService;
 
-    public AuthResponse signup(SignupRequest request) {
-        Company company = companyRepo.findById(request.getCompanyId())
-                .orElseThrow(() -> new ResourceNotFoundException("Company not found"));
+    @Autowired
+    private UserMapper userMapper;
 
+    public AuthResponse signup(SignupRequest request) {
         if (userRepo.existsByEmail(request.getEmail())) {
             throw new DuplicateUserException("User with this email already exists");
         }
 
+        Company company = companyRepo.findById(request.getCompanyId())
+                .orElseThrow(() -> new ResourceNotFoundException("Company not found"));
+
         Role role = roleRepo.findById(request.getRoleId())
                 .orElseThrow(() -> new ResourceNotFoundException("Role not found"));
 
-        User user = new User();
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
-        user.setEmail(request.getEmail());
-        user.setPhoneNumber(request.getPhoneNumber());
+        // Map SignupRequest to User (excluding role & company)
+        User user = userMapper.fromSignupRequest(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setCreatedAt(LocalDateTime.now());
         user.setCompany(company);
         user.setRole(role);
-        user.setCreatedAt(LocalDateTime.now());
 
         User saved = userRepo.save(user);
         String token = jwtService.generateToken(saved);

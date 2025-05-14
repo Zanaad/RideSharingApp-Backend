@@ -39,8 +39,8 @@ public class SecurityConfig {
                                 "/api/companies",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
-                        ).permitAll()
-                        .anyRequest().authenticated()
+                        ).permitAll() // Allow these endpoints without auth
+                        .anyRequest().authenticated() // Require auth for everything else
                 )
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint((req, res, ex) ->
@@ -50,8 +50,8 @@ public class SecurityConfig {
                                 ErrorResponseWriter.write(res, HttpStatus.FORBIDDEN, "You do not have permission to access this resource.")
                         )
                 )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(authorizationFilter, JwtFilter.class);
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class) // Add JWT validation filter before auth
+                .addFilterAfter(authorizationFilter, JwtFilter.class); // Add permission check after JWT validation
 
         return http.build();
     }

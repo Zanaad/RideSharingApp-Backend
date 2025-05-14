@@ -30,7 +30,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-        // 🔓 Allow public endpoints through
+        // Allow unauthenticated access to public endpoints
         if (path.startsWith("/api/auth") ||
                 path.startsWith("/swagger-ui") ||
                 path.startsWith("/v3/api-docs") ||
@@ -40,13 +40,14 @@ public class AuthorizationFilter extends OncePerRequestFilter {
             return;
         }
 
+        // Retrieve JWT claims from the request (set by JwtFilter)
         Claims claims = (Claims) request.getAttribute("claims");
-
         if (claims == null) {
-            ErrorResponseWriter.write(response, HttpStatus.UNAUTHORIZED, "Invalid token");
+            ErrorResponseWriter.write(response, HttpStatus.UNAUTHORIZED, "Authentication required.");
             return;
         }
 
+        // Extract role and HTTP method, then check access control
         Integer roleId = claims.get("roleId", Integer.class);
         String method = request.getMethod();
 
@@ -56,7 +57,6 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         permissionRequest.setPath(path);
 
         if (!accessControlService.isAccessAllowed(permissionRequest)) {
-            System.out.println("Access denied for roleId=" + roleId + ", path=" + path + ", method=" + method);
             ErrorResponseWriter.write(response, HttpStatus.FORBIDDEN, "Access denied");
             return;
         }

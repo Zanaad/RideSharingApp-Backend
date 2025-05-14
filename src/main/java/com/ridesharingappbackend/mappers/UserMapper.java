@@ -1,5 +1,6 @@
 package com.ridesharingappbackend.mappers;
 
+import com.ridesharingappbackend.dto.SignupRequest;
 import com.ridesharingappbackend.dto.UserDTO;
 import com.ridesharingappbackend.models.Company;
 import com.ridesharingappbackend.models.User;
@@ -29,4 +30,11 @@ public interface UserMapper {
         company.setId(companyId);
         return company;
     }
+
+    @Mapping(target = "company", source = "companyId", qualifiedByName = "mapCompany")
+    @Mapping(target = "role", ignore = true)
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    User fromSignupRequest(SignupRequest request);
+
 }

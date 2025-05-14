@@ -33,13 +33,11 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String authHeader = request.getHeader("Authorization");
 
+        // Validate Bearer token format
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             try {
                 String token = authHeader.substring(7);
-                System.out.println("🔐 JWT Token received: " + token);
-
                 Claims claims = jwtService.extractClaims(token);
-                System.out.println("✅ Claims extracted: " + claims);
 
                 String email = claims.getSubject();
                 Integer roleId = claims.get("roleId", Integer.class);
@@ -49,22 +47,19 @@ public class JwtFilter extends OncePerRequestFilter {
                     return;
                 }
 
+                // Set authentication context
                 SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + roleId);
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(email, null, List.of(authority));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
 
+                // Pass claims for later use
                 request.setAttribute("claims", claims);
-                System.out.println("✅ Authentication set for user: " + email + " with roleId: " + roleId);
 
             } catch (Exception ex) {
-                ex.printStackTrace();
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired token");
                 return;
             }
-        } else {
-            // Don't block requests here — SecurityFilterChain will handle it
-            System.out.println("ℹ️ No Authorization header or not a Bearer token");
         }
 
         filterChain.doFilter(request, response);
