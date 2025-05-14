@@ -1,16 +1,14 @@
 package com.ridesharingappbackend.security;
 
 import com.ridesharingappbackend.dto.PermissionCheckRequest;
-import com.ridesharingappbackend.models.User;
 import com.ridesharingappbackend.service.AccessControlService;
 import com.ridesharingappbackend.utils.ErrorResponseWriter;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -28,32 +26,38 @@ public class AuthorizationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
-                                    FilterChain filterChain)
-            throws ServletException, IOException {
+                                    FilterChain filterChain) throws ServletException, IOException {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String path = request.getRequestURI();
 
-        if (authentication == null || !authentication.isAuthenticated()) {
+        // 🔓 Allow public endpoints through
+        if (path.startsWith("/api/auth") ||
+                path.startsWith("/swagger-ui") ||
+                path.startsWith("/v3/api-docs") ||
+                path.equals("/swagger-ui.html") ||
+                path.equals("/api/companies")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        Object principal = authentication.getPrincipal();
-        if (!(principal instanceof User user) || user.getRole() == null) {
-            filterChain.doFilter(request, response);
+        Claims claims = (Claims) request.getAttribute("claims");
+
+        if (claims == null) {
+            ErrorResponseWriter.write(response, HttpStatus.UNAUTHORIZED, "Invalid token");
             return;
         }
 
-        PermissionCheckRequest accessCheck = new PermissionCheckRequest(
-                user.getRole().getId(),
-                request.getMethod(),
-                request.getRequestURI()
-        );
+        Integer roleId = claims.get("roleId", Integer.class);
+        String method = request.getMethod();
 
-        boolean allowed = accessControlService.isAccessAllowed(accessCheck);
+        PermissionCheckRequest permissionRequest = new PermissionCheckRequest();
+        permissionRequest.setRoleId(roleId);
+        permissionRequest.setVerb(method);
+        permissionRequest.setPath(path);
 
-        if (!allowed) {
-            ErrorResponseWriter.write(response, HttpStatus.FORBIDDEN, "You do not have permission to access this resource.");
+        if (!accessControlService.isAccessAllowed(permissionRequest)) {
+            System.out.println("Access denied for roleId=" + roleId + ", path=" + path + ", method=" + method);
+            ErrorResponseWriter.write(response, HttpStatus.FORBIDDEN, "Access denied");
             return;
         }
 

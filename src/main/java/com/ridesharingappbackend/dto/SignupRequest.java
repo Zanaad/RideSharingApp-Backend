@@ -13,6 +13,6 @@ public class SignupRequest {
     public String email;
     public String password;
     public String phoneNumber;
-    public UserType userType;
+    private Integer roleId;
     private Integer companyId;
 }

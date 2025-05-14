@@ -34,9 +34,9 @@ public class User {
     private String password;
 
     private String phoneNumber;
-// we should remove userType
-    @Enumerated(EnumType.STRING)
-   private UserType userType;
+//// we should remove userType
+//    @Enumerated(EnumType.STRING)
+//   private UserType userType;
 
 
    @ManyToOne()
