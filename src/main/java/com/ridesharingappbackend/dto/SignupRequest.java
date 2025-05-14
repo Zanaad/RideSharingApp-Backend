@@ -1,6 +1,5 @@
 package com.ridesharingappbackend.dto;
 
-import com.ridesharingappbackend.enums.UserType;
 import lombok.Getter;
 import lombok.Setter;
 
