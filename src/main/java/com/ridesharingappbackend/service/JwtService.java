@@ -41,4 +41,9 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody();
     }
+
+    public Integer getCompanyIdFromToken(String token) {
+        Claims claims = extractClaims(token);
+        return claims.get("companyId", Integer.class);
+    }
 }

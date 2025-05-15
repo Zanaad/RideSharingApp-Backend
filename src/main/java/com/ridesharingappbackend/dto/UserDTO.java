@@ -17,7 +17,7 @@ public class UserDTO {
     private String lastName;
     private String email;
     private String phoneNumber;
-    private String roleId;
-    private String companyId;
+    private Integer roleId;
+    private Integer companyId;
     private LocalDateTime createdAt;
 }

@@ -2,6 +2,7 @@ package com.ridesharingappbackend.service;
 
 import com.ridesharingappbackend.dto.RatingDTO;
 import com.ridesharingappbackend.mappers.RatingMapper;
+import com.ridesharingappbackend.models.Company;
 import com.ridesharingappbackend.models.Rating;
 import com.ridesharingappbackend.repository.RatingRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,80 +25,128 @@ class RatingServiceTest {
     @InjectMocks
     private RatingService ratingService;
 
+    private final Integer companyId = 10;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    void getAllRatings_ReturnsListOfDTOs() {
+    void getAllRatings_WithCompanyId_ReturnsFilteredList() {
         Rating rating = new Rating(); rating.setId(1);
         RatingDTO dto = new RatingDTO(); dto.setId(1);
 
-        when(ratingRepository.findAll()).thenReturn(List.of(rating));
+        when(ratingRepository.findByCompanyId(companyId)).thenReturn(List.of(rating));
         when(ratingMapper.toDTO(rating)).thenReturn(dto);
 
-        List<RatingDTO> result = ratingService.getAllRatings();
+        List<RatingDTO> result = ratingService.getAllRatings(companyId);
 
         assertEquals(1, result.size());
         assertEquals(1, result.get(0).getId());
     }
 
     @Test
-    void getRatingById_WhenExists_ReturnsDTO() {
-        Rating rating = new Rating(); rating.setId(1);
+    void getRatingByIdAndCompanyId_WhenMatch_ReturnsDTO() {
+        Company company = new Company(); company.setId(companyId);
+        Rating rating = new Rating(); rating.setId(1); rating.setCompany(company);
         RatingDTO dto = new RatingDTO(); dto.setId(1);
 
         when(ratingRepository.findById(1)).thenReturn(Optional.of(rating));
         when(ratingMapper.toDTO(rating)).thenReturn(dto);
 
-        Optional<RatingDTO> result = ratingService.getRatingById(1);
+        Optional<RatingDTO> result = ratingService.getRatingById(1, companyId);
 
         assertTrue(result.isPresent());
         assertEquals(1, result.get().getId());
     }
 
     @Test
-    void getRatingById_WhenNotExists_ReturnsEmptyOptional() {
-        when(ratingRepository.findById(99)).thenReturn(Optional.empty());
+    void getRatingByIdAndCompanyId_WhenNotMatchingCompany_ReturnsEmpty() {
+        Company company = new Company(); company.setId(99);
+        Rating rating = new Rating(); rating.setId(1); rating.setCompany(company);
 
-        Optional<RatingDTO> result = ratingService.getRatingById(99);
+        when(ratingRepository.findById(1)).thenReturn(Optional.of(rating));
 
-        assertFalse(result.isPresent());
+        Optional<RatingDTO> result = ratingService.getRatingById(1, companyId);
+
+        assertTrue(result.isEmpty());
     }
 
     @Test
-    void createRating_SavesEntity_ReturnsDTO() {
+    void getRatingsByCompanyAndDriverId_ReturnsList() {
+        Rating rating = new Rating(); rating.setId(1);
         RatingDTO dto = new RatingDTO(); dto.setId(1);
-        Rating entity = new Rating(); entity.setId(1);
 
-        when(ratingMapper.toEntity(dto)).thenReturn(entity);
-        when(ratingRepository.save(entity)).thenReturn(entity);
-        when(ratingMapper.toDTO(entity)).thenReturn(dto);
+        when(ratingRepository.findByCompanyIdAndDriverId(companyId, 2)).thenReturn(List.of(rating));
+        when(ratingMapper.toDTO(rating)).thenReturn(dto);
 
-        RatingDTO result = ratingService.createRating(dto);
+        List<RatingDTO> result = ratingService.getRatingsByCompanyAndDriverId(companyId, 2);
+
+        assertEquals(1, result.size());
+        assertEquals(1, result.get(0).getId());
+    }
+
+    @Test
+    void getRatingByCompanyAndRideId_ReturnsDTO() {
+        Rating rating = new Rating(); rating.setId(1);
+        RatingDTO dto = new RatingDTO(); dto.setId(1);
+
+        when(ratingRepository.findByCompanyIdAndRideId(companyId, 2)).thenReturn(Optional.of(rating));
+        when(ratingMapper.toDTO(rating)).thenReturn(dto);
+
+        Optional<RatingDTO> result = ratingService.getRatingByCompanyAndRideId(companyId, 2);
+
+        assertTrue(result.isPresent());
+        assertEquals(1, result.get().getId());
+    }
+
+    @Test
+    void createRating_SavesAndReturnsDTO() {
+        RatingDTO dto = new RatingDTO(); dto.setId(1);
+        Rating rating = new Rating(); rating.setId(1);
+
+        when(ratingMapper.toEntity(dto)).thenReturn(rating);
+        when(ratingRepository.save(any(Rating.class))).thenReturn(rating);
+        when(ratingMapper.toDTO(rating)).thenReturn(dto);
+
+        RatingDTO result = ratingService.createRating(dto, companyId);
 
         assertEquals(1, result.getId());
     }
 
     @Test
-    void deleteRating_WhenExists_ReturnsTrue() {
-        when(ratingRepository.existsById(1)).thenReturn(true);
-        doNothing().when(ratingRepository).deleteById(1);
+    void deleteRatingByIdAndCompanyId_WhenMatch_ReturnsTrue() {
+        Company company = new Company(); company.setId(companyId);
+        Rating rating = new Rating(); rating.setId(1); rating.setCompany(company);
 
-        boolean result = ratingService.deleteRating(1);
+        when(ratingRepository.findById(1)).thenReturn(Optional.of(rating));
+
+        boolean result = ratingService.deleteRatingByIdAndCompanyId(1, companyId);
 
         assertTrue(result);
-        verify(ratingRepository).deleteById(1);
+        verify(ratingRepository).delete(rating);
     }
 
     @Test
-    void deleteRating_WhenNotExists_ReturnsFalse() {
-        when(ratingRepository.existsById(2)).thenReturn(false);
+    void deleteRatingByIdAndCompanyId_WhenNoMatch_ReturnsFalse() {
+        Company company = new Company(); company.setId(5);
+        Rating rating = new Rating(); rating.setId(1); rating.setCompany(company);
 
-        boolean result = ratingService.deleteRating(2);
+        when(ratingRepository.findById(1)).thenReturn(Optional.of(rating));
+
+        boolean result = ratingService.deleteRatingByIdAndCompanyId(1, companyId);
 
         assertFalse(result);
-        verify(ratingRepository, never()).deleteById(any());
+        verify(ratingRepository, never()).delete(any());
+    }
+
+    @Test
+    void deleteRatingByIdAndCompanyId_WhenNotExists_ReturnsFalse() {
+        when(ratingRepository.findById(999)).thenReturn(Optional.empty());
+
+        boolean result = ratingService.deleteRatingByIdAndCompanyId(999, companyId);
+
+        assertFalse(result);
     }
 }

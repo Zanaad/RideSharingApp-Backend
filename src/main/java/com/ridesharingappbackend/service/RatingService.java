@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class RatingService {
-
     private final RatingRepository ratingRepository;
     private final RatingMapper ratingMapper;
 
@@ -21,28 +20,41 @@ public class RatingService {
         this.ratingMapper = ratingMapper;
     }
 
-    public List<RatingDTO> getAllRatings() {
-        return ratingRepository.findAll()
-                .stream()
+    public List<RatingDTO> getAllRatings(Integer companyId) {
+        return ratingRepository.findByCompanyId(companyId).stream()
                 .map(ratingMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
-    public Optional<RatingDTO> getRatingById(Integer id) {
+    public Optional<RatingDTO> getRatingById(Integer id, Integer companyId) {
         return ratingRepository.findById(id)
+                .filter(r -> r.getCompany().getId().equals(companyId))
                 .map(ratingMapper::toDTO);
     }
 
-    public RatingDTO createRating(RatingDTO dto) {
+    public List<RatingDTO> getRatingsByCompanyAndDriverId(Integer companyId, Integer driverId) {
+        return ratingRepository.findByCompanyIdAndDriverId(companyId, driverId).stream()
+                .map(ratingMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public Optional<RatingDTO> getRatingByCompanyAndRideId(Integer companyId, Integer rideId) {
+        return ratingRepository.findByCompanyIdAndRideId(companyId, rideId)
+                .map(ratingMapper::toDTO);
+    }
+
+    public RatingDTO createRating(RatingDTO dto, Integer companyId) {
         Rating rating = ratingMapper.toEntity(dto);
         return ratingMapper.toDTO(ratingRepository.save(rating));
     }
 
-    public boolean deleteRating(Integer id) {
-        if (ratingRepository.existsById(id)) {
-            ratingRepository.deleteById(id);
-            return true;
-        }
-        return false;
+    public boolean deleteRatingByIdAndCompanyId(Integer id, Integer companyId) {
+        return ratingRepository.findById(id)
+                .filter(r -> r.getCompany().getId().equals(companyId))
+                .map(r -> {
+                    ratingRepository.delete(r);
+                    return true;
+                })
+                .orElse(false);
     }
 }
