@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 @Service
 public class RideService {
     private final RideRepository rideRepository;
@@ -21,25 +20,20 @@ public class RideService {
         this.rideMapper = rideMapper;
     }
 
-    public List<RideDTO> getAllRides() {
-        return rideRepository.findAll().stream()
+    public List<RideDTO> getRidesByCompany(Integer companyId) {
+        return rideRepository.findByCompanyId(companyId).stream()
                 .map(rideMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
-    public Optional<RideDTO> getRideById(Integer id) {
+    public Optional<RideDTO> getRideById(Integer id, Integer companyId) {
         return rideRepository.findById(id)
+                .filter(r -> r.getCompany().getId().equals(companyId))
                 .map(rideMapper::toDTO);
     }
 
-    public List<RideDTO> getRidesByPassengerId(Integer passengerId) {
-        return rideRepository.findByPassengerId(passengerId).stream()
-                .map(rideMapper::toDTO)
-                .collect(Collectors.toList());
-    }
-
-    public List<RideDTO> getRidesByCompany(Integer companyId) {
-        return rideRepository.findByCompanyId(companyId).stream()
+    public List<RideDTO> getRidesByPassengerId(Integer passengerId, Integer companyId) {
+        return rideRepository.findByCompanyAndPassenger(companyId, passengerId).stream()
                 .map(rideMapper::toDTO)
                 .collect(Collectors.toList());
     }
@@ -62,16 +56,19 @@ public class RideService {
                 .collect(Collectors.toList());
     }
 
-    public RideDTO createRide(RideDTO rideDTO) {
+    public RideDTO createRide(RideDTO rideDTO, Integer companyId) {
+        rideDTO.setCompanyId(companyId); // Ensure company is set from authenticated request
         Ride ride = rideMapper.toEntity(rideDTO);
         return rideMapper.toDTO(rideRepository.save(ride));
     }
 
-    public boolean deleteRide(Integer id) {
-        if (rideRepository.existsById(id)) {
-            rideRepository.deleteById(id);
-            return true;
-        }
-        return false;
+    public boolean deleteRide(Integer id, Integer companyId) {
+        return rideRepository.findById(id)
+                .filter(r -> r.getCompany().getId().equals(companyId))
+                .map(r -> {
+                    rideRepository.delete(r);
+                    return true;
+                })
+                .orElse(false);
     }
 }

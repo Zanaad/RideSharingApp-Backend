@@ -2,6 +2,7 @@ package com.ridesharingappbackend.service;
 
 import com.ridesharingappbackend.dto.NotificationsDTO;
 import com.ridesharingappbackend.mappers.NotificationsMapper;
+import com.ridesharingappbackend.models.Company;
 import com.ridesharingappbackend.models.Notifications;
 import com.ridesharingappbackend.repository.NotificationsRepository;
 import org.springframework.stereotype.Service;
@@ -21,36 +22,34 @@ public class NotificationsService {
         this.mapper = mapper;
     }
 
-    public List<NotificationsDTO> getAllNotifications() {
-        return notificationRepository.findAll()
+    public List<NotificationsDTO> getAllNotifications(Integer companyId) {
+        return notificationRepository.findByCompanyId(companyId)
                 .stream()
                 .map(mapper::toDTO)
                 .collect(Collectors.toList());
     }
 
-    public Optional<NotificationsDTO> getNotificationById(Integer id) {
-        return notificationRepository.findById(id)
+    public Optional<NotificationsDTO> getNotificationById(Integer id, Integer companyId) {
+        return notificationRepository.findByIdAndCompanyId(id, companyId)
                 .map(mapper::toDTO);
     }
 
-    public List<NotificationsDTO> getNotificationsByUserId(Integer userId) {
-        return notificationRepository.findByUserId(userId)
-                .stream()
-                .map(mapper::toDTO)
-                .collect(Collectors.toList());
-    }
-
-    public NotificationsDTO createNotification(NotificationsDTO dto) {
+    public NotificationsDTO createNotification(NotificationsDTO dto, Integer companyId) {
         Notifications notification = mapper.toEntity(dto);
+        Company company = new Company();
+        company.setId(companyId);
+        notification.setCompany(company);
         return mapper.toDTO(notificationRepository.save(notification));
     }
 
-    public void deleteNotification(Integer id) {
-        notificationRepository.deleteById(id);
+    public void deleteNotification(Integer id, Integer companyId) {
+        Notifications notification = notificationRepository.findByIdAndCompanyId(id, companyId)
+                .orElseThrow(() -> new RuntimeException("Notification not found or not part of this company"));
+        notificationRepository.delete(notification);
     }
 
-    public NotificationsDTO markAsRead(Integer id) {
-        return notificationRepository.findById(id)
+    public NotificationsDTO markAsRead(Integer id, Integer companyId) {
+        return notificationRepository.findByIdAndCompanyId(id, companyId)
                 .map(notification -> {
                     notification.setIsRead(true);
                     return mapper.toDTO(notificationRepository.save(notification));

@@ -44,8 +44,4 @@ public class Rating {
     @ManyToOne
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
-
-    public Integer getCompanyId() {
-        return this.company != null ? this.company.getId() : null;
-    }
 }

@@ -48,7 +48,7 @@ public class PaymentController {
             @PathVariable Integer rideId,
             HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
-        PaymentDTO payment = paymentService.getPaymentByCompanyAndRideId(companyId, rideId);
+        PaymentDTO payment = paymentService.getPaymentByRideId(rideId, companyId);
         return payment != null ? ResponseEntity.ok(payment) : ResponseEntity.notFound().build();
     }
 
@@ -74,8 +74,11 @@ public class PaymentController {
     }
 
     @PostMapping
-    public PaymentDTO createPayment(@RequestBody PaymentDTO paymentDTO) {
-        return paymentService.createPayment(paymentDTO);
+    public ResponseEntity<PaymentDTO> createPayment(
+            @RequestBody PaymentDTO paymentDTO,
+            HttpServletRequest request) {
+        Integer companyId = (Integer) request.getAttribute("companyId");
+        return ResponseEntity.ok(paymentService.createPayment(paymentDTO, companyId));
     }
 
     @PutMapping("/{id}")
@@ -85,7 +88,11 @@ public class PaymentController {
             HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
         return paymentService.getPaymentByIdAndCompanyId(id, companyId)
-                .map(existing -> ResponseEntity.ok(paymentService.createPayment(paymentDTO)))
+                .map(existing -> {
+                    // Optionally set ID to ensure overwrite
+                    paymentDTO.setId(id);
+                    return ResponseEntity.ok(paymentService.createPayment(paymentDTO, companyId));
+                })
                 .orElse(ResponseEntity.notFound().build());
     }
 

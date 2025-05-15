@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 @Service
 public class UserService {
     private final UserRepository userRepository;
@@ -18,38 +17,35 @@ public class UserService {
         this.userMapper = userMapper;
     }
 
-
     public List<UserDTO> getAllUsersByCompany(Integer companyId) {
         return userRepository.findByCompanyId(companyId).stream()
                 .map(userMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
-
-    public List<UserDTO> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(userMapper::toDTO)
-                .collect(Collectors.toList());
-    }
-
-    public Optional<UserDTO> getUserById(Integer id) {
-        return userRepository.findById(id).map(userMapper::toDTO);
-    }
-
-    public UserDTO updateUser(Integer id, UserDTO updatedUserDto) {
+    public Optional<UserDTO> getUserById(Integer id, Integer companyId) {
         return userRepository.findById(id)
+                .filter(user -> user.getCompany().getId().equals(companyId))
+                .map(userMapper::toDTO);
+    }
+
+    public UserDTO updateUser(Integer id, UserDTO updatedUserDto, Integer companyId) {
+        return userRepository.findById(id)
+                .filter(user -> user.getCompany().getId().equals(companyId))
                 .map(user -> {
                     userMapper.updateUserFromDto(updatedUserDto, user);
                     return userMapper.toDTO(userRepository.save(user));
                 })
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("User not found or not in your company"));
     }
 
-    public boolean deleteUser(Integer id) {
-        if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
-            return true;
-        }
-        return false;
+    public boolean deleteUser(Integer id, Integer companyId) {
+        return userRepository.findById(id)
+                .filter(user -> user.getCompany().getId().equals(companyId))
+                .map(user -> {
+                    userRepository.delete(user);
+                    return true;
+                })
+                .orElse(false);
     }
 }

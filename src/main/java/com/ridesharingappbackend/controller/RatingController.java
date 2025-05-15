@@ -4,15 +4,14 @@ import com.ridesharingappbackend.dto.RatingDTO;
 import com.ridesharingappbackend.service.RatingService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/ratings")
 public class RatingController {
+
     private final RatingService ratingService;
 
     public RatingController(RatingService ratingService) {
@@ -20,9 +19,7 @@ public class RatingController {
     }
 
     @GetMapping
-    public List<RatingDTO> getAllRatings(
-            @RequestParam(required = false) Integer companyId,
-            HttpServletRequest request) {
+    public List<RatingDTO> getAllRatings(@RequestParam(required = false) Integer companyId, HttpServletRequest request) {
         if (companyId == null) {
             companyId = (Integer) request.getAttribute("companyId");
         }
@@ -36,44 +33,31 @@ public class RatingController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RatingDTO> getRatingById(
-            @PathVariable Integer id,
-            HttpServletRequest request) {
+    public ResponseEntity<RatingDTO> getRatingById(@PathVariable Integer id, HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
-        return ratingService.getRatingByIdAndCompanyId(id, companyId)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ratingService.getRatingById(id, companyId).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/driver/{driverId}")
-    public List<RatingDTO> getRatingsByDriver(
-            @PathVariable Integer driverId,
-            HttpServletRequest request) {
+    public List<RatingDTO> getRatingsByDriver(@PathVariable Integer driverId, HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
         return ratingService.getRatingsByCompanyAndDriverId(companyId, driverId);
     }
 
     @GetMapping("/ride/{rideId}")
-    public ResponseEntity<RatingDTO> getRatingByRide(
-            @PathVariable Integer rideId,
-            HttpServletRequest request) {
+    public ResponseEntity<RatingDTO> getRatingByRide(@PathVariable Integer rideId, HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
-        return ratingService.getRatingByCompanyAndRideId(companyId, rideId)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ratingService.getRatingByCompanyAndRideId(companyId, rideId).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'COMPANY_ADMIN', 'USER')")
-    public RatingDTO createRating(@RequestBody RatingDTO ratingDTO) {
-        return ratingService.createRating(ratingDTO);
+    public RatingDTO createRating(@RequestBody RatingDTO ratingDTO, HttpServletRequest request) {
+        Integer companyId = (Integer) request.getAttribute("companyId");
+        return ratingService.createRating(ratingDTO, companyId);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'COMPANY_ADMIN')")
-    public ResponseEntity<Void> deleteRating(
-            @PathVariable Integer id,
-            HttpServletRequest request) {
+    public ResponseEntity<Void> deleteRating(@PathVariable Integer id, HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
         if (ratingService.deleteRatingByIdAndCompanyId(id, companyId)) {
             return ResponseEntity.noContent().build();

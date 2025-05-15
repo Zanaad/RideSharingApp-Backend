@@ -7,23 +7,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PaymentRepository extends JpaRepository<Payment, Integer> {
-    Payment findByRideId(Integer rideId);
-
     List<Payment> findByCompanyId(Integer companyId);
 
-    @Query("SELECT p FROM Payment p WHERE p.company.id = :companyId AND p.ride.id = :rideId")
-    Payment findByCompanyAndRideId(@Param("companyId") Integer companyId,
-                                   @Param("rideId") Integer rideId);
+    Optional<Payment> findByIdAndCompanyId(Integer id, Integer companyId);
 
-    @Query("SELECT p FROM Payment p WHERE p.company.id = :companyId AND p.user.id = :userId")
-    List<Payment> findByCompanyAndUserId(@Param("companyId") Integer companyId,
-                                         @Param("userId") Integer userId);
+    Payment findByCompanyIdAndRideId(Integer companyId, Integer rideId);
 
-    @Query("SELECT p FROM Payment p WHERE p.company.id = :companyId AND p.paymentStatus = :status")
-    List<Payment> findByCompanyIdAndPaymentStatus(@Param("companyId") Integer companyId,
-                                                  @Param("status") PaymentStatus status);
+    List<Payment> findByCompanyIdAndUserId(Integer companyId, Integer userId);
 
-    boolean existsByIdAndCompanyId(Integer id, Integer companyId);
+    List<Payment> findByCompanyIdAndPaymentStatus(Integer companyId, PaymentStatus status);
+
 }

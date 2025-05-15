@@ -1,14 +1,19 @@
 package com.ridesharingappbackend.service;
 
 import com.ridesharingappbackend.dto.RideDTO;
+import com.ridesharingappbackend.enums.RideStatus;
 import com.ridesharingappbackend.mappers.RideMapper;
+import com.ridesharingappbackend.models.Company;
 import com.ridesharingappbackend.models.Ride;
 import com.ridesharingappbackend.repository.RideRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -24,94 +29,167 @@ class RideServiceTest {
     @InjectMocks
     private RideService rideService;
 
+    private final Integer companyId = 5;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    void getAllRides_ReturnsListOfDTOs() {
-        Ride ride = new Ride(); ride.setId(1);
-        RideDTO dto = new RideDTO(); dto.setId(1);
+    void getRidesByCompany_ReturnsListOfDTOs() {
+        Ride ride = new Ride();
+        ride.setId(1);
+        RideDTO dto = new RideDTO();
+        dto.setId(1);
 
-        when(rideRepository.findAll()).thenReturn(List.of(ride));
+        when(rideRepository.findByCompanyId(companyId)).thenReturn(List.of(ride));
         when(rideMapper.toDTO(ride)).thenReturn(dto);
 
-        List<RideDTO> result = rideService.getAllRides();
+        List<RideDTO> result = rideService.getRidesByCompany(companyId);
 
         assertEquals(1, result.size());
         assertEquals(1, result.get(0).getId());
     }
 
     @Test
-    void getRideById_WhenExists_ReturnsDTO() {
-        Ride ride = new Ride(); ride.setId(1);
-        RideDTO dto = new RideDTO(); dto.setId(1);
+    void getRideById_WhenCompanyMatches_ReturnsDTO() {
+        Company company = new Company();
+        company.setId(companyId);
+        Ride ride = new Ride();
+        ride.setId(1);
+        ride.setCompany(company);
+        RideDTO dto = new RideDTO();
+        dto.setId(1);
 
         when(rideRepository.findById(1)).thenReturn(Optional.of(ride));
         when(rideMapper.toDTO(ride)).thenReturn(dto);
 
-        Optional<RideDTO> result = rideService.getRideById(1);
+        Optional<RideDTO> result = rideService.getRideById(1, companyId);
 
         assertTrue(result.isPresent());
         assertEquals(1, result.get().getId());
     }
 
     @Test
-    void getRideById_WhenNotExists_ReturnsEmpty() {
-        when(rideRepository.findById(100)).thenReturn(Optional.empty());
+    void getRideById_WhenCompanyMismatch_ReturnsEmpty() {
+        Company company = new Company();
+        company.setId(999);
+        Ride ride = new Ride();
+        ride.setId(1);
+        ride.setCompany(company);
 
-        Optional<RideDTO> result = rideService.getRideById(100);
+        when(rideRepository.findById(1)).thenReturn(Optional.of(ride));
 
-        assertFalse(result.isPresent());
+        Optional<RideDTO> result = rideService.getRideById(1, companyId);
+
+        assertTrue(result.isEmpty());
     }
 
     @Test
-    void getRidesByPassengerId_ReturnsDTOList() {
-        Ride ride = new Ride(); ride.setId(1);
-        RideDTO dto = new RideDTO(); dto.setId(1);
+    void getRidesByPassengerId_ReturnsListOfDTOs() {
+        Ride ride = new Ride();
+        ride.setId(1);
+        RideDTO dto = new RideDTO();
+        dto.setId(1);
 
-        when(rideRepository.findByPassengerId(42)).thenReturn(List.of(ride));
+        when(rideRepository.findByCompanyAndPassenger(companyId, 101)).thenReturn(List.of(ride));
         when(rideMapper.toDTO(ride)).thenReturn(dto);
 
-        List<RideDTO> result = rideService.getRidesByPassengerId(42);
+        List<RideDTO> result = rideService.getRidesByPassengerId(101, companyId);
 
         assertEquals(1, result.size());
         assertEquals(1, result.get(0).getId());
     }
 
     @Test
-    void createRide_SavesEntity_ReturnsDTO() {
-        RideDTO dto = new RideDTO(); dto.setId(1);
-        Ride ride = new Ride(); ride.setId(1);
+    void getRidesByCompanyAndStatus_ReturnsListOfDTOs() {
+        Ride ride = new Ride();
+        ride.setId(2);
+        RideDTO dto = new RideDTO();
+        dto.setId(2);
+
+        when(rideRepository.findByCompanyIdAndStatus(companyId, RideStatus.REQUESTED)).thenReturn(List.of(ride));
+        when(rideMapper.toDTO(ride)).thenReturn(dto);
+
+        List<RideDTO> result = rideService.getRidesByCompanyAndStatus(companyId, RideStatus.REQUESTED);
+
+        assertEquals(1, result.size());
+        assertEquals(2, result.get(0).getId());
+    }
+
+
+    @Test
+    void getRidesByCompanyAndDriver_ReturnsListOfDTOs() {
+        Ride ride = new Ride();
+        ride.setId(3);
+        RideDTO dto = new RideDTO();
+        dto.setId(3);
+
+        when(rideRepository.findByCompanyAndDriver(companyId, 200)).thenReturn(List.of(ride));
+        when(rideMapper.toDTO(ride)).thenReturn(dto);
+
+        List<RideDTO> result = rideService.getRidesByCompanyAndDriver(companyId, 200);
+
+        assertEquals(1, result.size());
+        assertEquals(3, result.get(0).getId());
+    }
+
+    @Test
+    void createRide_AssignsCompanyAndSaves_ReturnsDTO() {
+        RideDTO dto = new RideDTO();
+        dto.setId(1);
+        Ride ride = new Ride();
+        ride.setId(1);
 
         when(rideMapper.toEntity(dto)).thenReturn(ride);
         when(rideRepository.save(ride)).thenReturn(ride);
         when(rideMapper.toDTO(ride)).thenReturn(dto);
 
-        RideDTO result = rideService.createRide(dto);
+        RideDTO result = rideService.createRide(dto, companyId);
 
         assertEquals(1, result.getId());
+        assertEquals(companyId, dto.getCompanyId());
     }
 
     @Test
-    void deleteRide_WhenExists_ReturnsTrue() {
-        when(rideRepository.existsById(1)).thenReturn(true);
-        doNothing().when(rideRepository).deleteById(1);
+    void deleteRide_WhenCompanyMatches_DeletesAndReturnsTrue() {
+        Company company = new Company();
+        company.setId(companyId);
+        Ride ride = new Ride();
+        ride.setId(1);
+        ride.setCompany(company);
 
-        boolean result = rideService.deleteRide(1);
+        when(rideRepository.findById(1)).thenReturn(Optional.of(ride));
+
+        boolean result = rideService.deleteRide(1, companyId);
 
         assertTrue(result);
-        verify(rideRepository).deleteById(1);
+        verify(rideRepository).delete(ride);
+    }
+
+    @Test
+    void deleteRide_WhenCompanyDoesNotMatch_ReturnsFalse() {
+        Company company = new Company();
+        company.setId(999);
+        Ride ride = new Ride();
+        ride.setId(1);
+        ride.setCompany(company);
+
+        when(rideRepository.findById(1)).thenReturn(Optional.of(ride));
+
+        boolean result = rideService.deleteRide(1, companyId);
+
+        assertFalse(result);
+        verify(rideRepository, never()).delete(any());
     }
 
     @Test
     void deleteRide_WhenNotExists_ReturnsFalse() {
-        when(rideRepository.existsById(2)).thenReturn(false);
+        when(rideRepository.findById(1)).thenReturn(Optional.empty());
 
-        boolean result = rideService.deleteRide(2);
+        boolean result = rideService.deleteRide(1, companyId);
 
         assertFalse(result);
-        verify(rideRepository, never()).deleteById(any());
     }
 }

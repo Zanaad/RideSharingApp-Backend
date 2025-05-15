@@ -3,8 +3,8 @@ package com.ridesharingappbackend.service;
 import com.ridesharingappbackend.dto.PaymentDTO;
 import com.ridesharingappbackend.enums.PaymentStatus;
 import com.ridesharingappbackend.mappers.PaymentMapper;
-import com.ridesharingappbackend.models.Payment;
 import com.ridesharingappbackend.models.Company;
+import com.ridesharingappbackend.models.Payment;
 import com.ridesharingappbackend.repository.PaymentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,75 +26,48 @@ class PaymentServiceTest {
     @InjectMocks
     private PaymentService paymentService;
 
+    private final Integer companyId = 5;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    void getAllPayments_WithoutCompanyId_ReturnsList() {
+    void getAllPayments_ReturnsFilteredList() {
         Payment payment = new Payment(); payment.setId(1);
         PaymentDTO dto = new PaymentDTO(); dto.setId(1);
 
-        when(paymentRepository.findAll()).thenReturn(List.of(payment));
+        when(paymentRepository.findByCompanyId(companyId)).thenReturn(List.of(payment));
         when(paymentMapper.toDTO(payment)).thenReturn(dto);
 
-        List<PaymentDTO> result = paymentService.getAllPayments(null);
+        List<PaymentDTO> result = paymentService.getAllPayments(companyId);
 
         assertEquals(1, result.size());
         assertEquals(1, result.get(0).getId());
     }
 
     @Test
-    void getAllPayments_WithCompanyId_ReturnsFilteredList() {
+    void getPaymentByIdAndCompanyId_WhenExists_ReturnsDTO() {
         Payment payment = new Payment(); payment.setId(1);
         PaymentDTO dto = new PaymentDTO(); dto.setId(1);
 
-        when(paymentRepository.findByCompanyId(5)).thenReturn(List.of(payment));
+        when(paymentRepository.findByIdAndCompanyId(1, companyId)).thenReturn(Optional.of(payment));
         when(paymentMapper.toDTO(payment)).thenReturn(dto);
 
-        List<PaymentDTO> result = paymentService.getAllPayments(5);
-
-        assertEquals(1, result.size());
-        assertEquals(1, result.get(0).getId());
-    }
-
-    @Test
-    void getPaymentById_WhenExists_ReturnsDTO() {
-        Payment payment = new Payment(); payment.setId(1);
-        PaymentDTO dto = new PaymentDTO(); dto.setId(1);
-
-        when(paymentRepository.findById(1)).thenReturn(Optional.of(payment));
-        when(paymentMapper.toDTO(payment)).thenReturn(dto);
-
-        Optional<PaymentDTO> result = paymentService.getPaymentById(1);
+        Optional<PaymentDTO> result = paymentService.getPaymentByIdAndCompanyId(1, companyId);
 
         assertTrue(result.isPresent());
         assertEquals(1, result.get().getId());
     }
 
     @Test
-    void getPaymentById_WhenNotExists_ReturnsEmpty() {
-        when(paymentRepository.findById(99)).thenReturn(Optional.empty());
+    void getPaymentByIdAndCompanyId_WhenNotExists_ReturnsEmpty() {
+        when(paymentRepository.findByIdAndCompanyId(99, companyId)).thenReturn(Optional.empty());
 
-        Optional<PaymentDTO> result = paymentService.getPaymentById(99);
+        Optional<PaymentDTO> result = paymentService.getPaymentByIdAndCompanyId(99, companyId);
 
         assertFalse(result.isPresent());
-    }
-
-    @Test
-    void getPaymentByIdAndCompanyId_WhenMatch_ReturnsDTO() {
-        Company company = new Company(); company.setId(5);
-        Payment payment = new Payment(); payment.setId(1); payment.setCompany(company);
-        PaymentDTO dto = new PaymentDTO(); dto.setId(1);
-
-        when(paymentRepository.findById(1)).thenReturn(Optional.of(payment));
-        when(paymentMapper.toDTO(payment)).thenReturn(dto);
-
-        Optional<PaymentDTO> result = paymentService.getPaymentByIdAndCompanyId(1, 5);
-
-        assertTrue(result.isPresent());
-        assertEquals(1, result.get().getId());
     }
 
     @Test
@@ -102,25 +75,12 @@ class PaymentServiceTest {
         Payment payment = new Payment(); payment.setId(2);
         PaymentDTO dto = new PaymentDTO(); dto.setId(2);
 
-        when(paymentRepository.findByRideId(10)).thenReturn(payment);
+        when(paymentRepository.findByCompanyIdAndRideId(companyId, 10)).thenReturn(payment);
         when(paymentMapper.toDTO(payment)).thenReturn(dto);
 
-        PaymentDTO result = paymentService.getPaymentByRideId(10);
+        PaymentDTO result = paymentService.getPaymentByRideId(10, companyId);
 
         assertEquals(2, result.getId());
-    }
-
-    @Test
-    void getPaymentByCompanyAndRideId_ReturnsDTO() {
-        Payment payment = new Payment(); payment.setId(3);
-        PaymentDTO dto = new PaymentDTO(); dto.setId(3);
-
-        when(paymentRepository.findByCompanyAndRideId(4, 10)).thenReturn(payment);
-        when(paymentMapper.toDTO(payment)).thenReturn(dto);
-
-        PaymentDTO result = paymentService.getPaymentByCompanyAndRideId(4, 10);
-
-        assertEquals(3, result.getId());
     }
 
     @Test
@@ -128,10 +88,10 @@ class PaymentServiceTest {
         Payment payment = new Payment(); payment.setId(4);
         PaymentDTO dto = new PaymentDTO(); dto.setId(4);
 
-        when(paymentRepository.findByCompanyAndUserId(5, 100)).thenReturn(List.of(payment));
+        when(paymentRepository.findByCompanyIdAndUserId(companyId, 100)).thenReturn(List.of(payment));
         when(paymentMapper.toDTO(payment)).thenReturn(dto);
 
-        List<PaymentDTO> result = paymentService.getPaymentsByCompanyAndUserId(5, 100);
+        List<PaymentDTO> result = paymentService.getPaymentsByCompanyAndUserId(companyId, 100);
 
         assertEquals(1, result.size());
         assertEquals(4, result.get(0).getId());
@@ -142,11 +102,11 @@ class PaymentServiceTest {
         Payment payment = new Payment(); payment.setId(7);
         PaymentDTO dto = new PaymentDTO(); dto.setId(7);
 
-        when(paymentRepository.findByCompanyIdAndPaymentStatus(5, PaymentStatus.PENDING))
+        when(paymentRepository.findByCompanyIdAndPaymentStatus(companyId, PaymentStatus.PENDING))
                 .thenReturn(List.of(payment));
         when(paymentMapper.toDTO(payment)).thenReturn(dto);
 
-        List<PaymentDTO> result = paymentService.getPaymentsByCompanyAndStatus(5, "pending");
+        List<PaymentDTO> result = paymentService.getPaymentsByCompanyAndStatus(companyId, "pending");
 
         assertEquals(1, result.size());
         assertEquals(7, result.get(0).getId());
@@ -155,7 +115,7 @@ class PaymentServiceTest {
     @Test
     void getPaymentsByCompanyAndStatus_InvalidStatus_ThrowsException() {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                paymentService.getPaymentsByCompanyAndStatus(1, "invalid_status"));
+                paymentService.getPaymentsByCompanyAndStatus(companyId, "invalid_status"));
 
         assertEquals("Invalid payment status: invalid_status", exception.getMessage());
     }
@@ -166,68 +126,37 @@ class PaymentServiceTest {
         Payment payment = new Payment(); payment.setId(10);
 
         when(paymentMapper.toEntity(dto)).thenReturn(payment);
-        when(paymentRepository.save(payment)).thenReturn(payment);
+        when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
         when(paymentMapper.toDTO(payment)).thenReturn(dto);
 
-        PaymentDTO result = paymentService.createPayment(dto);
+        PaymentDTO result = paymentService.createPayment(dto, companyId);
 
         assertEquals(10, result.getId());
-    }
-
-    @Test
-    void deletePayment_WhenExists_ReturnsTrue() {
-        when(paymentRepository.existsById(1)).thenReturn(true);
-        doNothing().when(paymentRepository).deleteById(1);
-
-        boolean result = paymentService.deletePayment(1);
-
-        assertTrue(result);
-        verify(paymentRepository).deleteById(1);
-    }
-
-    @Test
-    void deletePayment_WhenNotExists_ReturnsFalse() {
-        when(paymentRepository.existsById(99)).thenReturn(false);
-
-        boolean result = paymentService.deletePayment(99);
-
-        assertFalse(result);
-        verify(paymentRepository, never()).deleteById(any());
+        assertEquals(companyId, payment.getCompany().getId());
     }
 
     @Test
     void deletePaymentByIdAndCompanyId_WhenExists_ReturnsTrue() {
-        Company company = new Company(); company.setId(5);
-        Payment payment = new Payment(); payment.setId(8); payment.setCompany(company);
+        Payment payment = new Payment(); payment.setId(8);
+        Company company = new Company(); company.setId(companyId);
+        payment.setCompany(company);
 
-        when(paymentRepository.findById(8)).thenReturn(Optional.of(payment));
+        when(paymentRepository.findByIdAndCompanyId(8, companyId)).thenReturn(Optional.of(payment));
         doNothing().when(paymentRepository).delete(payment);
 
-        boolean result = paymentService.deletePaymentByIdAndCompanyId(8, 5);
+        boolean result = paymentService.deletePaymentByIdAndCompanyId(8, companyId);
 
         assertTrue(result);
         verify(paymentRepository).delete(payment);
     }
 
     @Test
-    void deletePaymentByIdAndCompanyId_WhenNotMatchingCompany_ReturnsFalse() {
-        Company company = new Company(); company.setId(1);
-        Payment payment = new Payment(); payment.setId(9); payment.setCompany(company);
+    void deletePaymentByIdAndCompanyId_WhenNotExists_ReturnsFalse() {
+        when(paymentRepository.findByIdAndCompanyId(99, companyId)).thenReturn(Optional.empty());
 
-        when(paymentRepository.findById(9)).thenReturn(Optional.of(payment));
-
-        boolean result = paymentService.deletePaymentByIdAndCompanyId(9, 2);
+        boolean result = paymentService.deletePaymentByIdAndCompanyId(99, companyId);
 
         assertFalse(result);
         verify(paymentRepository, never()).delete(any());
-    }
-
-    @Test
-    void deletePaymentByIdAndCompanyId_WhenNotExists_ReturnsFalse() {
-        when(paymentRepository.findById(100)).thenReturn(Optional.empty());
-
-        boolean result = paymentService.deletePaymentByIdAndCompanyId(100, 1);
-
-        assertFalse(result);
     }
 }

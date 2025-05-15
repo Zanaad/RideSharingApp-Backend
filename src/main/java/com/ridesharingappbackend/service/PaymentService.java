@@ -3,6 +3,7 @@ package com.ridesharingappbackend.service;
 import com.ridesharingappbackend.dto.PaymentDTO;
 import com.ridesharingappbackend.enums.PaymentStatus;
 import com.ridesharingappbackend.mappers.PaymentMapper;
+import com.ridesharingappbackend.models.Company;
 import com.ridesharingappbackend.models.Payment;
 import com.ridesharingappbackend.repository.PaymentRepository;
 import org.springframework.stereotype.Service;
@@ -22,74 +23,43 @@ public class PaymentService {
     }
 
     public List<PaymentDTO> getAllPayments(Integer companyId) {
-        if (companyId != null) {
-            return paymentRepository.findByCompanyId(companyId).stream()
-                    .map(paymentMapper::toDTO)
-                    .collect(Collectors.toList());
-        }
-        return paymentRepository.findAll().stream()
-                .map(paymentMapper::toDTO)
-                .collect(Collectors.toList());
-    }
-
-    public Optional<PaymentDTO> getPaymentById(Integer id) {
-        return paymentRepository.findById(id)
-                .map(paymentMapper::toDTO);
+        return paymentRepository.findByCompanyId(companyId).stream().map(paymentMapper::toDTO).collect(Collectors.toList());
     }
 
     public Optional<PaymentDTO> getPaymentByIdAndCompanyId(Integer id, Integer companyId) {
-        return paymentRepository.findById(id)
-                .filter(p -> p.getCompany().getId().equals(companyId))
-                .map(paymentMapper::toDTO);
+        return paymentRepository.findByIdAndCompanyId(id, companyId).map(paymentMapper::toDTO);
     }
 
-    public PaymentDTO getPaymentByRideId(Integer rideId) {
-        Payment payment = paymentRepository.findByRideId(rideId);
-        return paymentMapper.toDTO(payment);
-    }
-
-    public PaymentDTO getPaymentByCompanyAndRideId(Integer companyId, Integer rideId) {
-        Payment payment = paymentRepository.findByCompanyAndRideId(companyId, rideId);
+    public PaymentDTO getPaymentByRideId(Integer rideId, Integer companyId) {
+        Payment payment = paymentRepository.findByCompanyIdAndRideId(companyId, rideId);
         return paymentMapper.toDTO(payment);
     }
 
     public List<PaymentDTO> getPaymentsByCompanyAndUserId(Integer companyId, Integer userId) {
-        return paymentRepository.findByCompanyAndUserId(companyId, userId).stream()
-                .map(paymentMapper::toDTO)
-                .collect(Collectors.toList());
+        return paymentRepository.findByCompanyIdAndUserId(companyId, userId).stream().map(paymentMapper::toDTO).collect(Collectors.toList());
     }
 
     public List<PaymentDTO> getPaymentsByCompanyAndStatus(Integer companyId, String status) {
         try {
             PaymentStatus paymentStatus = PaymentStatus.valueOf(status.toUpperCase());
-            return paymentRepository.findByCompanyIdAndPaymentStatus(companyId, paymentStatus).stream()
-                    .map(paymentMapper::toDTO)
-                    .collect(Collectors.toList());
+            return paymentRepository.findByCompanyIdAndPaymentStatus(companyId, paymentStatus).stream().map(paymentMapper::toDTO).collect(Collectors.toList());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid payment status: " + status);
         }
     }
 
-    public PaymentDTO createPayment(PaymentDTO dto) {
+    public PaymentDTO createPayment(PaymentDTO dto, Integer companyId) {
         Payment payment = paymentMapper.toEntity(dto);
+        Company company = new Company();
+        company.setId(companyId);
+        payment.setCompany(company);
         return paymentMapper.toDTO(paymentRepository.save(payment));
     }
 
-    public boolean deletePayment(Integer id) {
-        if (paymentRepository.existsById(id)) {
-            paymentRepository.deleteById(id);
-            return true;
-        }
-        return false;
-    }
-
     public boolean deletePaymentByIdAndCompanyId(Integer id, Integer companyId) {
-        return paymentRepository.findById(id)
-                .filter(payment -> payment.getCompany().getId().equals(companyId))
-                .map(payment -> {
-                    paymentRepository.delete(payment);
-                    return true;
-                })
-                .orElse(false);
+        return paymentRepository.findByIdAndCompanyId(id, companyId).map(payment -> {
+            paymentRepository.delete(payment);
+            return true;
+        }).orElse(false);
     }
 }

@@ -5,7 +5,6 @@ import com.ridesharingappbackend.enums.RideStatus;
 import com.ridesharingappbackend.service.RideService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,6 +13,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/rides")
 public class RideController {
+
     private final RideService rideService;
 
     public RideController(RideService rideService) {
@@ -21,21 +21,23 @@ public class RideController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public List<RideDTO> getAllRides() {
-        return rideService.getAllRides();
+    public List<RideDTO> getAllRides(HttpServletRequest request) {
+        Integer companyId = (Integer) request.getAttribute("companyId");
+        return rideService.getRidesByCompany(companyId);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RideDTO> getRideById(@PathVariable Integer id) {
-        Optional<RideDTO> ride = rideService.getRideById(id);
-        return ride.map(ResponseEntity::ok)
+    public ResponseEntity<RideDTO> getRideById(@PathVariable Integer id, HttpServletRequest request) {
+        Integer companyId = (Integer) request.getAttribute("companyId");
+        return rideService.getRideById(id, companyId)
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/passenger/{passengerId}")
-    public List<RideDTO> getRidesByPassengerId(@PathVariable Integer passengerId) {
-        return rideService.getRidesByPassengerId(passengerId);
+    public List<RideDTO> getRidesByPassengerId(@PathVariable Integer passengerId, HttpServletRequest request) {
+        Integer companyId = (Integer) request.getAttribute("companyId");
+        return rideService.getRidesByCompanyAndPassenger(companyId, passengerId);
     }
 
     @GetMapping("/company")
@@ -45,38 +47,33 @@ public class RideController {
     }
 
     @GetMapping("/company/status/{status}")
-    public List<RideDTO> getRidesByCompanyAndStatus(
-            HttpServletRequest request,
-            @PathVariable RideStatus status) {
+    public List<RideDTO> getRidesByCompanyAndStatus(@PathVariable RideStatus status, HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
         return rideService.getRidesByCompanyAndStatus(companyId, status);
     }
 
     @GetMapping("/company/driver/{driverId}")
-    public List<RideDTO> getRidesByCompanyAndDriver(
-            HttpServletRequest request,
-            @PathVariable Integer driverId) {
+    public List<RideDTO> getRidesByCompanyAndDriver(@PathVariable Integer driverId, HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
         return rideService.getRidesByCompanyAndDriver(companyId, driverId);
     }
 
     @GetMapping("/company/passenger/{passengerId}")
-    public List<RideDTO> getRidesByCompanyAndPassenger(
-            HttpServletRequest request,
-            @PathVariable Integer passengerId) {
+    public List<RideDTO> getRidesByCompanyAndPassenger(@PathVariable Integer passengerId, HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
         return rideService.getRidesByCompanyAndPassenger(companyId, passengerId);
     }
 
     @PostMapping
-    public RideDTO createRide(@RequestBody RideDTO rideDTO) {
-        return rideService.createRide(rideDTO);
+    public RideDTO createRide(@RequestBody RideDTO rideDTO, HttpServletRequest request) {
+        Integer companyId = (Integer) request.getAttribute("companyId");
+        return rideService.createRide(rideDTO, companyId);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'COMPANY_ADMIN')")
-    public ResponseEntity<Void> deleteRide(@PathVariable Integer id) {
-        boolean deleted = rideService.deleteRide(id);
+    public ResponseEntity<Void> deleteRide(@PathVariable Integer id, HttpServletRequest request) {
+        Integer companyId = (Integer) request.getAttribute("companyId");
+        boolean deleted = rideService.deleteRide(id, companyId);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 }

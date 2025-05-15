@@ -21,22 +21,12 @@ public class RatingService {
     }
 
     public List<RatingDTO> getAllRatings(Integer companyId) {
-        if (companyId != null) {
-            return ratingRepository.findByCompanyId(companyId).stream()
-                    .map(ratingMapper::toDTO)
-                    .collect(Collectors.toList());
-        }
-        return ratingRepository.findAll().stream()
+        return ratingRepository.findByCompanyId(companyId).stream()
                 .map(ratingMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
-    public Optional<RatingDTO> getRatingById(Integer id) {
-        return ratingRepository.findById(id)
-                .map(ratingMapper::toDTO);
-    }
-
-    public Optional<RatingDTO> getRatingByIdAndCompanyId(Integer id, Integer companyId) {
+    public Optional<RatingDTO> getRatingById(Integer id, Integer companyId) {
         return ratingRepository.findById(id)
                 .filter(r -> r.getCompany().getId().equals(companyId))
                 .map(ratingMapper::toDTO);
@@ -53,17 +43,9 @@ public class RatingService {
                 .map(ratingMapper::toDTO);
     }
 
-    public RatingDTO createRating(RatingDTO dto) {
+    public RatingDTO createRating(RatingDTO dto, Integer companyId) {
         Rating rating = ratingMapper.toEntity(dto);
         return ratingMapper.toDTO(ratingRepository.save(rating));
-    }
-
-    public boolean deleteRating(Integer id) {
-        if (ratingRepository.existsById(id)) {
-            ratingRepository.deleteById(id);
-            return true;
-        }
-        return false;
     }
 
     public boolean deleteRatingByIdAndCompanyId(Integer id, Integer companyId) {

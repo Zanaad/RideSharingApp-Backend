@@ -19,35 +19,38 @@ public class NotificationsController {
     }
 
     @GetMapping
-    public List<NotificationsDTO> getAllNotifications() {
-        return notificationService.getAllNotifications();
+    public List<NotificationsDTO> getAllNotifications(@RequestParam Integer companyId) {
+        return notificationService.getAllNotifications(companyId);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<NotificationsDTO> getNotificationById(@PathVariable Integer id) {
-        Optional<NotificationsDTO> notification = notificationService.getNotificationById(id);
+    public ResponseEntity<NotificationsDTO> getNotificationById(
+            @PathVariable Integer id,
+            @RequestParam Integer companyId) {
+        Optional<NotificationsDTO> notification = notificationService.getNotificationById(id, companyId);
         return notification.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/user/{userId}")
-    public List<NotificationsDTO> getNotificationsByUserId(@PathVariable Integer userId) {
-        return notificationService.getNotificationsByUserId(userId);
-    }
-
     @PostMapping
-    public NotificationsDTO createNotification(@RequestBody NotificationsDTO dto) {
-        return notificationService.createNotification(dto);
+    public NotificationsDTO createNotification(
+            @RequestBody NotificationsDTO dto,
+            @RequestParam Integer companyId) {
+        return notificationService.createNotification(dto, companyId);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteNotification(@PathVariable Integer id) {
-        notificationService.deleteNotification(id);
+    public ResponseEntity<Void> deleteNotification(
+            @PathVariable Integer id,
+            @RequestParam Integer companyId) {
+        notificationService.deleteNotification(id, companyId);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}/read")
-    public ResponseEntity<NotificationsDTO> markAsRead(@PathVariable Integer id) {
-        NotificationsDTO updated = notificationService.markAsRead(id);
+    public ResponseEntity<NotificationsDTO> markAsRead(
+            @PathVariable Integer id,
+            @RequestParam Integer companyId) {
+        NotificationsDTO updated = notificationService.markAsRead(id, companyId);
         return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
     }
 }
