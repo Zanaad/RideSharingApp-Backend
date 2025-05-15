@@ -1,16 +1,16 @@
 package com.ridesharingappbackend.controller;
 
-import com.ridesharingappbackend.models.Payment;
+import com.ridesharingappbackend.dto.PaymentDTO;
 import com.ridesharingappbackend.service.PaymentService;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/payments")
 public class PaymentController {
-
     private final PaymentService paymentService;
 
     public PaymentController(PaymentService paymentService) {
@@ -18,27 +18,92 @@ public class PaymentController {
     }
 
     @GetMapping
-    public List<Payment> getAllPayments() {
-        return paymentService.getAllPayments();
+    public List<PaymentDTO> getAllPayments(
+            @RequestParam(required = false) Integer companyId,
+            HttpServletRequest request) {
+        if (companyId == null) {
+            companyId = (Integer) request.getAttribute("companyId");
+        }
+        return paymentService.getAllPayments(companyId);
+    }
+
+    @GetMapping("/company")
+    public List<PaymentDTO> getPaymentsByCompany(HttpServletRequest request) {
+        Integer companyId = (Integer) request.getAttribute("companyId");
+        return paymentService.getAllPayments(companyId);
     }
 
     @GetMapping("/{id}")
-    public Optional<Payment> getPaymentById(@PathVariable Integer id) {
-        return paymentService.getPaymentById(id);
+    public ResponseEntity<PaymentDTO> getPaymentById(
+            @PathVariable Integer id,
+            HttpServletRequest request) {
+        Integer companyId = (Integer) request.getAttribute("companyId");
+        return paymentService.getPaymentByIdAndCompanyId(id, companyId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/ride/{rideId}")
-    public Payment getPaymentByRideId(@PathVariable Integer rideId) {
-        return paymentService.getPaymentByRideId(rideId);
+    public ResponseEntity<PaymentDTO> getPaymentByRideId(
+            @PathVariable Integer rideId,
+            HttpServletRequest request) {
+        Integer companyId = (Integer) request.getAttribute("companyId");
+        PaymentDTO payment = paymentService.getPaymentByRideId(rideId, companyId);
+        return payment != null ? ResponseEntity.ok(payment) : ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/user/{userId}")
+    public List<PaymentDTO> getPaymentsByUser(
+            @PathVariable Integer userId,
+            HttpServletRequest request) {
+        Integer companyId = (Integer) request.getAttribute("companyId");
+        return paymentService.getPaymentsByCompanyAndUserId(companyId, userId);
+    }
+
+    @GetMapping("/status/{status}")
+    public ResponseEntity<?> getPaymentsByStatus(
+            @PathVariable String status,
+            HttpServletRequest request) {
+        Integer companyId = (Integer) request.getAttribute("companyId");
+        try {
+            List<PaymentDTO> payments = paymentService.getPaymentsByCompanyAndStatus(companyId, status);
+            return ResponseEntity.ok(payments);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping
-    public Payment createPayment(@RequestBody Payment payment) {
-        return paymentService.createPayment(payment);
+    public ResponseEntity<PaymentDTO> createPayment(
+            @RequestBody PaymentDTO paymentDTO,
+            HttpServletRequest request) {
+        Integer companyId = (Integer) request.getAttribute("companyId");
+        return ResponseEntity.ok(paymentService.createPayment(paymentDTO, companyId));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<PaymentDTO> updatePayment(
+            @PathVariable Integer id,
+            @RequestBody PaymentDTO paymentDTO,
+            HttpServletRequest request) {
+        Integer companyId = (Integer) request.getAttribute("companyId");
+        return paymentService.getPaymentByIdAndCompanyId(id, companyId)
+                .map(existing -> {
+                    // Optionally set ID to ensure overwrite
+                    paymentDTO.setId(id);
+                    return ResponseEntity.ok(paymentService.createPayment(paymentDTO, companyId));
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public boolean deletePayment(@PathVariable Integer id) {
-        return paymentService.deletePayment(id);
+    public ResponseEntity<Void> deletePayment(
+            @PathVariable Integer id,
+            HttpServletRequest request) {
+        Integer companyId = (Integer) request.getAttribute("companyId");
+        if (paymentService.deletePaymentByIdAndCompanyId(id, companyId)) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 }

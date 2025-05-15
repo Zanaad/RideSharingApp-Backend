@@ -1,47 +1,51 @@
 package com.ridesharingappbackend.service;
 
-import com.ridesharingappbackend.models.User;
+import com.ridesharingappbackend.dto.UserDTO;
+import com.ridesharingappbackend.mappers.UserMapper;
 import com.ridesharingappbackend.repository.UserRepository;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
-
+import java.util.stream.Collectors;
 @Service
 public class UserService {
-
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, UserMapper userMapper) {
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserDTO> getAllUsersByCompany(Integer companyId) {
+        return userRepository.findByCompanyId(companyId).stream()
+                .map(userMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
-    public Optional<User> getUserById(Integer id) {
-        return userRepository.findById(id);
-    }
-
-    public User updateUser(Integer id, User updatedUser) {
+    public Optional<UserDTO> getUserById(Integer id, Integer companyId) {
         return userRepository.findById(id)
-                .map(user -> {
-                    user.setFirstName(updatedUser.getFirstName());
-                    user.setLastName(updatedUser.getLastName());
-                    user.setEmail(updatedUser.getEmail());
-                    user.setPassword(updatedUser.getPassword());
-                    user.setPhoneNumber(updatedUser.getPhoneNumber());
-                    user.setUserType(updatedUser.getUserType());
-                    return userRepository.save(user);
-                }).orElse(null);
+                .filter(user -> user.getCompany().getId().equals(companyId))
+                .map(userMapper::toDTO);
     }
 
-    public boolean deleteUser(Integer id) {
-        if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
-            return true;
-        }
-        return false;
+    public UserDTO updateUser(Integer id, UserDTO updatedUserDto, Integer companyId) {
+        return userRepository.findById(id)
+                .filter(user -> user.getCompany().getId().equals(companyId))
+                .map(user -> {
+                    userMapper.updateUserFromDto(updatedUserDto, user);
+                    return userMapper.toDTO(userRepository.save(user));
+                })
+                .orElseThrow(() -> new RuntimeException("User not found or not in your company"));
+    }
+
+    public boolean deleteUser(Integer id, Integer companyId) {
+        return userRepository.findById(id)
+                .filter(user -> user.getCompany().getId().equals(companyId))
+                .map(user -> {
+                    userRepository.delete(user);
+                    return true;
+                })
+                .orElse(false);
     }
 }

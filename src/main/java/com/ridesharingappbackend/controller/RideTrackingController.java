@@ -1,7 +1,8 @@
 package com.ridesharingappbackend.controller;
 
-import com.ridesharingappbackend.models.RideTracking;
+import com.ridesharingappbackend.dto.RideTrackingDTO;
 import com.ridesharingappbackend.service.RideTrackingService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,22 +19,24 @@ public class RideTrackingController {
     }
 
     @GetMapping
-    public List<RideTracking> getAllRideTrackings() {
+    public List<RideTrackingDTO> getAllRideTrackings() {
         return rideTrackingService.getAllRideTrackings();
     }
 
     @GetMapping("/{id}")
-    public Optional<RideTracking> getRideTrackingById(@PathVariable Integer id) {
-        return rideTrackingService.getRideTrackingById(id);
+    public ResponseEntity<RideTrackingDTO> getRideTrackingById(@PathVariable Integer id) {
+        Optional<RideTrackingDTO> dto = rideTrackingService.getRideTrackingById(id);
+        return dto.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public RideTracking createRideTracking(@RequestBody RideTracking rideTracking) {
-        return rideTrackingService.createRideTracking(rideTracking);
+    public RideTrackingDTO createRideTracking(@RequestBody RideTrackingDTO dto) {
+        return rideTrackingService.createRideTracking(dto);
     }
 
     @DeleteMapping("/{id}")
-    public boolean deleteRideTracking(@PathVariable Integer id) {
-        return rideTrackingService.deleteRideTracking(id);
+    public ResponseEntity<Void> deleteRideTracking(@PathVariable Integer id) {
+        boolean deleted = rideTrackingService.deleteRideTracking(id);
+        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 }

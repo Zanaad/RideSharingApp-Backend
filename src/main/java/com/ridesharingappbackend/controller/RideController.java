@@ -1,7 +1,9 @@
 package com.ridesharingappbackend.controller;
 
-import com.ridesharingappbackend.models.Ride;
+import com.ridesharingappbackend.dto.RideDTO;
+import com.ridesharingappbackend.enums.RideStatus;
 import com.ridesharingappbackend.service.RideService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,33 +21,59 @@ public class RideController {
     }
 
     @GetMapping
-    public List<Ride> getAllRides() {
-        return rideService.getAllRides();
+    public List<RideDTO> getAllRides(HttpServletRequest request) {
+        Integer companyId = (Integer) request.getAttribute("companyId");
+        return rideService.getRidesByCompany(companyId);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Ride> getRideById(@PathVariable Integer id) {
-        Optional<Ride> ride = rideService.getRideById(id);
-        return ride.map(ResponseEntity::ok)
+    public ResponseEntity<RideDTO> getRideById(@PathVariable Integer id, HttpServletRequest request) {
+        Integer companyId = (Integer) request.getAttribute("companyId");
+        return rideService.getRideById(id, companyId)
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/passenger/{passengerId}")
-    public List<Ride> getRidesByPassengerId(@PathVariable Integer passengerId) {
-        return rideService.getRidesByPassengerId(passengerId);
+    public List<RideDTO> getRidesByPassengerId(@PathVariable Integer passengerId, HttpServletRequest request) {
+        Integer companyId = (Integer) request.getAttribute("companyId");
+        return rideService.getRidesByCompanyAndPassenger(companyId, passengerId);
+    }
+
+    @GetMapping("/company")
+    public List<RideDTO> getRidesByCompany(HttpServletRequest request) {
+        Integer companyId = (Integer) request.getAttribute("companyId");
+        return rideService.getRidesByCompany(companyId);
+    }
+
+    @GetMapping("/company/status/{status}")
+    public List<RideDTO> getRidesByCompanyAndStatus(@PathVariable RideStatus status, HttpServletRequest request) {
+        Integer companyId = (Integer) request.getAttribute("companyId");
+        return rideService.getRidesByCompanyAndStatus(companyId, status);
+    }
+
+    @GetMapping("/company/driver/{driverId}")
+    public List<RideDTO> getRidesByCompanyAndDriver(@PathVariable Integer driverId, HttpServletRequest request) {
+        Integer companyId = (Integer) request.getAttribute("companyId");
+        return rideService.getRidesByCompanyAndDriver(companyId, driverId);
+    }
+
+    @GetMapping("/company/passenger/{passengerId}")
+    public List<RideDTO> getRidesByCompanyAndPassenger(@PathVariable Integer passengerId, HttpServletRequest request) {
+        Integer companyId = (Integer) request.getAttribute("companyId");
+        return rideService.getRidesByCompanyAndPassenger(companyId, passengerId);
     }
 
     @PostMapping
-    public Ride createRide(@RequestBody Ride ride) {
-        return rideService.createRide(ride);
+    public RideDTO createRide(@RequestBody RideDTO rideDTO, HttpServletRequest request) {
+        Integer companyId = (Integer) request.getAttribute("companyId");
+        return rideService.createRide(rideDTO, companyId);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRide(@PathVariable Integer id) {
-        boolean deleted = rideService.deleteRide(id);
-        if (deleted) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+    public ResponseEntity<Void> deleteRide(@PathVariable Integer id, HttpServletRequest request) {
+        Integer companyId = (Integer) request.getAttribute("companyId");
+        boolean deleted = rideService.deleteRide(id, companyId);
+        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 }

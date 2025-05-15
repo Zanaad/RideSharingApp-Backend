@@ -1,11 +1,12 @@
 package com.ridesharingappbackend.controller;
 
-import com.ridesharingappbackend.models.Notifications;
+import com.ridesharingappbackend.dto.NotificationsDTO;
 import com.ridesharingappbackend.service.NotificationsService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/notifications")
@@ -18,39 +19,38 @@ public class NotificationsController {
     }
 
     @GetMapping
-    public List<Notifications> getAllNotifications() {
-        return notificationService.getAllNotifications();
+    public List<NotificationsDTO> getAllNotifications(@RequestParam Integer companyId) {
+        return notificationService.getAllNotifications(companyId);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Notifications> getNotificationById(@PathVariable Integer id) {
-        return notificationService.getNotificationById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("/user/{userId}")
-    public List<Notifications> getNotificationsByUserId(@PathVariable Integer userId) {
-        return notificationService.getNotificationsByUserId(userId);
+    public ResponseEntity<NotificationsDTO> getNotificationById(
+            @PathVariable Integer id,
+            @RequestParam Integer companyId) {
+        Optional<NotificationsDTO> notification = notificationService.getNotificationById(id, companyId);
+        return notification.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public Notifications createNotification(@RequestBody Notifications notification) {
-        return notificationService.createNotification(notification);
+    public NotificationsDTO createNotification(
+            @RequestBody NotificationsDTO dto,
+            @RequestParam Integer companyId) {
+        return notificationService.createNotification(dto, companyId);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteNotification(@PathVariable Integer id) {
-        notificationService.deleteNotification(id);
+    public ResponseEntity<Void> deleteNotification(
+            @PathVariable Integer id,
+            @RequestParam Integer companyId) {
+        notificationService.deleteNotification(id, companyId);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}/read")
-    public ResponseEntity<Notifications> markAsRead(@PathVariable Integer id) {
-        Notifications updated = notificationService.markAsRead(id);
-        if (updated != null) {
-            return ResponseEntity.ok(updated);
-        }
-        return ResponseEntity.notFound().build();
+    public ResponseEntity<NotificationsDTO> markAsRead(
+            @PathVariable Integer id,
+            @RequestParam Integer companyId) {
+        NotificationsDTO updated = notificationService.markAsRead(id, companyId);
+        return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
     }
 }
