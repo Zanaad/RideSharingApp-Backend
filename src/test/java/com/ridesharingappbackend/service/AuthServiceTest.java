@@ -3,13 +3,15 @@ package com.ridesharingappbackend.service;
 import com.ridesharingappbackend.dto.AuthRequest;
 import com.ridesharingappbackend.dto.AuthResponse;
 import com.ridesharingappbackend.dto.SignupRequest;
-import com.ridesharingappbackend.enums.UserType;
 import com.ridesharingappbackend.exceptions.DuplicateUserException;
 import com.ridesharingappbackend.exceptions.InvalidCredentialsException;
 import com.ridesharingappbackend.exceptions.ResourceNotFoundException;
+import com.ridesharingappbackend.mappers.UserMapper;
 import com.ridesharingappbackend.models.Company;
+import com.ridesharingappbackend.models.Role;
 import com.ridesharingappbackend.models.User;
 import com.ridesharingappbackend.repository.CompanyRepository;
+import com.ridesharingappbackend.repository.RoleRepository;
 import com.ridesharingappbackend.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,22 +23,18 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class AuthServiceTest {
 
-    @Mock
-    private UserRepository userRepo;
-    @Mock
-    private CompanyRepository companyRepo;
-    @Mock
-    private PasswordEncoder passwordEncoder;
-    @Mock
-    private JwtService jwtService;
+    @Mock private UserRepository userRepo;
+    @Mock private CompanyRepository companyRepo;
+    @Mock private RoleRepository roleRepo;
+    @Mock private PasswordEncoder passwordEncoder;
+    @Mock private JwtService jwtService;
+    @Mock private UserMapper userMapper;
 
-    @InjectMocks
-    private AuthService authService;
+    @InjectMocks private AuthService authService;
 
     @BeforeEach
     void setUp() {
@@ -44,110 +42,125 @@ class AuthServiceTest {
     }
 
     @Test
-    void signup_WhenValidRequest_ReturnsAuthResponse() {
-        SignupRequest req = new SignupRequest();
-        req.setEmail("test@example.com");
-        req.setPassword("123");
-        req.setCompanyId(1);
-        req.setFirstName("John");
-        req.setLastName("Doe");
-        req.setPhoneNumber("12345");
-        req.setUserType(UserType.DRIVER);
+    void signup_successful() {
+        SignupRequest request = new SignupRequest();
+        request.setEmail("test@example.com");
+        request.setPassword("secret");
+        request.setCompanyId(1);
+        request.setRoleId(2);
 
         Company company = new Company();
         company.setId(1);
+
+        Role role = new Role();
+        role.setId(2);
+        role.setName("ADMIN");
+
         User user = new User();
-        user.setId(1);
-        user.setCompany(company);
-        user.setUserType(UserType.DRIVER);
+        User savedUser = new User();
+        savedUser.setCompany(company);
+        savedUser.setRole(role);
 
-        when(companyRepo.findById(1)).thenReturn(Optional.of(company));
         when(userRepo.existsByEmail("test@example.com")).thenReturn(false);
-        when(passwordEncoder.encode("123")).thenReturn("encoded123");
-        when(userRepo.save(any(User.class))).thenReturn(user);
-        when(jwtService.generateToken(user)).thenReturn("mocked-jwt");
+        when(companyRepo.findById(1)).thenReturn(Optional.of(company));
+        when(roleRepo.findById(2)).thenReturn(Optional.of(role));
+        when(userMapper.fromSignupRequest(request)).thenReturn(user);
+        when(passwordEncoder.encode("secret")).thenReturn("encodedSecret");
+        when(userRepo.save(user)).thenReturn(savedUser);
+        when(jwtService.generateToken(savedUser)).thenReturn("testToken");
 
-        AuthResponse response = authService.signup(req);
+        AuthResponse response = authService.signup(request);
 
-        assertNotNull(response);
-        assertEquals("mocked-jwt", response.getToken());
-        assertEquals("DRIVER", response.getRole());
+        assertEquals("testToken", response.getToken());
+        assertEquals("ADMIN", response.getRole());
         assertEquals(1, response.getCompanyId());
     }
 
     @Test
-    void signup_WhenEmailExists_ThrowsDuplicateUserException() {
-        SignupRequest req = new SignupRequest();
-        req.setEmail("test@example.com");
-        req.setCompanyId(1);
+    void signup_duplicateEmail_throws() {
+        SignupRequest request = new SignupRequest();
+        request.setEmail("test@example.com");
 
-        Company company = new Company();
-        company.setId(1);
-
-        when(companyRepo.findById(1)).thenReturn(Optional.of(company));
         when(userRepo.existsByEmail("test@example.com")).thenReturn(true);
 
-        assertThrows(DuplicateUserException.class, () -> authService.signup(req));
+        assertThrows(DuplicateUserException.class, () -> authService.signup(request));
     }
 
     @Test
-    void signup_WhenCompanyNotFound_ThrowsResourceNotFoundException() {
-        SignupRequest req = new SignupRequest();
-        req.setCompanyId(999);
+    void signup_companyNotFound_throws() {
+        SignupRequest request = new SignupRequest();
+        request.setEmail("test@example.com");
+        request.setCompanyId(10);
 
-        when(companyRepo.findById(999)).thenReturn(Optional.empty());
+        when(userRepo.existsByEmail("test@example.com")).thenReturn(false);
+        when(companyRepo.findById(10)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> authService.signup(req));
+        assertThrows(ResourceNotFoundException.class, () -> authService.signup(request));
     }
 
     @Test
-    void login_WhenValid_ReturnsAuthResponse() {
-        AuthRequest req = new AuthRequest();
-        req.setEmail("user@example.com");
-        req.setPassword("raw123");
+    void signup_roleNotFound_throws() {
+        SignupRequest request = new SignupRequest();
+        request.setEmail("test@example.com");
+        request.setCompanyId(1);
+        request.setRoleId(99);
 
+        when(userRepo.existsByEmail("test@example.com")).thenReturn(false);
+        when(companyRepo.findById(1)).thenReturn(Optional.of(new Company()));
+        when(roleRepo.findById(99)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> authService.signup(request));
+    }
+
+    @Test
+    void login_successful() {
+        AuthRequest request = new AuthRequest();
+        request.setEmail("test@example.com");
+        request.setPassword("secret");
+
+        Role role = new Role();
+        role.setName("PASSENGER");
         Company company = new Company();
-        company.setId(10);
+        company.setId(5);
+
         User user = new User();
-        user.setEmail("user@example.com");
-        user.setPassword("encoded123");
-        user.setUserType(UserType.ADMIN);
+        user.setPassword("encodedSecret");
         user.setCompany(company);
+        user.setRole(role);
 
-        when(userRepo.findByEmail("user@example.com")).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches("raw123", "encoded123")).thenReturn(true);
-        when(jwtService.generateToken(user)).thenReturn("jwt-token");
+        when(userRepo.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("secret", "encodedSecret")).thenReturn(true);
+        when(jwtService.generateToken(user)).thenReturn("loginToken");
 
-        AuthResponse response = authService.login(req);
+        AuthResponse response = authService.login(request);
 
-        assertNotNull(response);
-        assertEquals("ADMIN", response.getRole());
-        assertEquals("jwt-token", response.getToken());
-        assertEquals(10, response.getCompanyId());
+        assertEquals("loginToken", response.getToken());
+        assertEquals("PASSENGER", response.getRole());
+        assertEquals(5, response.getCompanyId());
     }
 
     @Test
-    void login_WhenEmailNotFound_ThrowsInvalidCredentials() {
-        AuthRequest req = new AuthRequest();
-        req.setEmail("noone@example.com");
-
-        when(userRepo.findByEmail("noone@example.com")).thenReturn(Optional.empty());
-
-        assertThrows(InvalidCredentialsException.class, () -> authService.login(req));
-    }
-
-    @Test
-    void login_WhenPasswordWrong_ThrowsInvalidCredentials() {
-        AuthRequest req = new AuthRequest();
-        req.setEmail("user@example.com");
-        req.setPassword("wrong123");
+    void login_wrongPassword_throws() {
+        AuthRequest request = new AuthRequest();
+        request.setEmail("test@example.com");
+        request.setPassword("wrong");
 
         User user = new User();
-        user.setPassword("encodedPassword");
+        user.setPassword("correctEncoded");
 
-        when(userRepo.findByEmail("user@example.com")).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches("wrong123", "encodedPassword")).thenReturn(false);
+        when(userRepo.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("wrong", "correctEncoded")).thenReturn(false);
 
-        assertThrows(InvalidCredentialsException.class, () -> authService.login(req));
+        assertThrows(InvalidCredentialsException.class, () -> authService.login(request));
+    }
+
+    @Test
+    void login_userNotFound_throws() {
+        AuthRequest request = new AuthRequest();
+        request.setEmail("nonexistent@example.com");
+
+        when(userRepo.findByEmail("nonexistent@example.com")).thenReturn(Optional.empty());
+
+        assertThrows(InvalidCredentialsException.class, () -> authService.login(request));
     }
 }
