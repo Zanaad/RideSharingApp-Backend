@@ -31,8 +31,10 @@ class RideTrackingServiceTest {
 
     @Test
     void getAllRideTrackings_ReturnsDTOList() {
-        RideTracking rideTracking = new RideTracking(); rideTracking.setId(1);
-        RideTrackingDTO dto = new RideTrackingDTO(); dto.setId(1);
+        RideTracking rideTracking = new RideTracking();
+        rideTracking.setId(1);
+        RideTrackingDTO dto = new RideTrackingDTO();
+        dto.setId(1);
 
         when(rideTrackingRepository.findAll()).thenReturn(List.of(rideTracking));
         when(mapper.toDTO(rideTracking)).thenReturn(dto);
@@ -41,12 +43,16 @@ class RideTrackingServiceTest {
 
         assertEquals(1, result.size());
         assertEquals(1, result.get(0).getId());
+        verify(rideTrackingRepository).findAll();
+        verify(mapper).toDTO(rideTracking);
     }
 
     @Test
     void getRideTrackingById_WhenExists_ReturnsDTO() {
-        RideTracking rideTracking = new RideTracking(); rideTracking.setId(1);
-        RideTrackingDTO dto = new RideTrackingDTO(); dto.setId(1);
+        RideTracking rideTracking = new RideTracking();
+        rideTracking.setId(1);
+        RideTrackingDTO dto = new RideTrackingDTO();
+        dto.setId(1);
 
         when(rideTrackingRepository.findById(1)).thenReturn(Optional.of(rideTracking));
         when(mapper.toDTO(rideTracking)).thenReturn(dto);
@@ -55,6 +61,8 @@ class RideTrackingServiceTest {
 
         assertTrue(result.isPresent());
         assertEquals(1, result.get().getId());
+        verify(rideTrackingRepository).findById(1);
+        verify(mapper).toDTO(rideTracking);
     }
 
     @Test
@@ -64,12 +72,16 @@ class RideTrackingServiceTest {
         Optional<RideTrackingDTO> result = rideTrackingService.getRideTrackingById(99);
 
         assertFalse(result.isPresent());
+        verify(rideTrackingRepository).findById(99);
+        verify(mapper, never()).toDTO(any());
     }
 
     @Test
     void createRideTracking_SavesEntityAndReturnsDTO() {
-        RideTrackingDTO dto = new RideTrackingDTO(); dto.setId(1);
-        RideTracking entity = new RideTracking(); entity.setId(1);
+        RideTrackingDTO dto = new RideTrackingDTO();
+        dto.setId(1);
+        RideTracking entity = new RideTracking();
+        entity.setId(1);
 
         when(mapper.toEntity(dto)).thenReturn(entity);
         when(rideTrackingRepository.save(entity)).thenReturn(entity);
@@ -78,7 +90,9 @@ class RideTrackingServiceTest {
         RideTrackingDTO result = rideTrackingService.createRideTracking(dto);
 
         assertEquals(1, result.getId());
+        verify(mapper).toEntity(dto);
         verify(rideTrackingRepository).save(entity);
+        verify(mapper).toDTO(entity);
     }
 
     @Test
@@ -89,6 +103,7 @@ class RideTrackingServiceTest {
         boolean result = rideTrackingService.deleteRideTracking(1);
 
         assertTrue(result);
+        verify(rideTrackingRepository).existsById(1);
         verify(rideTrackingRepository).deleteById(1);
     }
 
@@ -99,6 +114,7 @@ class RideTrackingServiceTest {
         boolean result = rideTrackingService.deleteRideTracking(2);
 
         assertFalse(result);
+        verify(rideTrackingRepository).existsById(2);
         verify(rideTrackingRepository, never()).deleteById(any());
     }
 }

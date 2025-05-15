@@ -30,14 +30,14 @@ class DriverServiceTest {
     }
 
     @Test
-    void getAllDrivers_ReturnsDTOList() {
+    void getAllDriversByCompany_ReturnsDTOList() {
         Driver driver = new Driver(); driver.setId(1);
         DriverDTO dto = new DriverDTO(); dto.setId(1);
 
-        when(driverRepository.findAll()).thenReturn(List.of(driver));
+        when(driverRepository.findByCompanyId(10)).thenReturn(List.of(driver));
         when(driverMapper.toDTO(driver)).thenReturn(dto);
 
-        List<DriverDTO> result = driverService.getAllDrivers();
+        List<DriverDTO> result = driverService.getAllDriversByCompany(10);
 
         assertEquals(1, result.size());
         assertEquals(1, result.get(0).getId());

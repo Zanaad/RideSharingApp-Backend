@@ -30,23 +30,43 @@ class VehicleServiceTest {
     }
 
     @Test
-    void getAllVehicles_ReturnsMappedList() {
-        Vehicle vehicle = new Vehicle(); vehicle.setId(1);
-        VehicleDTO dto = new VehicleDTO(); dto.setId(1);
+    void getAllVehicles_WithCompanyId_ReturnsFilteredList() {
+        Vehicle vehicle = new Vehicle();
+        vehicle.setId(1);
+        VehicleDTO dto = new VehicleDTO();
+        dto.setId(1);
 
-        when(vehicleRepository.findAll()).thenReturn(List.of(vehicle));
+        when(vehicleRepository.findByCompanyId(10)).thenReturn(List.of(vehicle));
         when(vehicleMapper.toDTO(vehicle)).thenReturn(dto);
 
-        List<VehicleDTO> result = vehicleService.getAllVehicles();
+        List<VehicleDTO> result = vehicleService.getAllVehicles(10);
 
         assertEquals(1, result.size());
         assertEquals(1, result.get(0).getId());
     }
 
     @Test
+    void getAllVehicles_WithoutCompanyId_ReturnsAll() {
+        Vehicle vehicle = new Vehicle();
+        vehicle.setId(2);
+        VehicleDTO dto = new VehicleDTO();
+        dto.setId(2);
+
+        when(vehicleRepository.findAll()).thenReturn(List.of(vehicle));
+        when(vehicleMapper.toDTO(vehicle)).thenReturn(dto);
+
+        List<VehicleDTO> result = vehicleService.getAllVehicles(null);
+
+        assertEquals(1, result.size());
+        assertEquals(2, result.get(0).getId());
+    }
+
+    @Test
     void getVehicleById_WhenExists_ReturnsDTO() {
-        Vehicle vehicle = new Vehicle(); vehicle.setId(1);
-        VehicleDTO dto = new VehicleDTO(); dto.setId(1);
+        Vehicle vehicle = new Vehicle();
+        vehicle.setId(1);
+        VehicleDTO dto = new VehicleDTO();
+        dto.setId(1);
 
         when(vehicleRepository.findById(1)).thenReturn(Optional.of(vehicle));
         when(vehicleMapper.toDTO(vehicle)).thenReturn(dto);
@@ -68,8 +88,10 @@ class VehicleServiceTest {
 
     @Test
     void getVehicleByDriverId_ReturnsDTO() {
-        Vehicle vehicle = new Vehicle(); vehicle.setId(1);
-        VehicleDTO dto = new VehicleDTO(); dto.setId(1);
+        Vehicle vehicle = new Vehicle();
+        vehicle.setId(1);
+        VehicleDTO dto = new VehicleDTO();
+        dto.setId(1);
 
         when(vehicleRepository.findByDriverId(10)).thenReturn(vehicle);
         when(vehicleMapper.toDTO(vehicle)).thenReturn(dto);
@@ -81,8 +103,10 @@ class VehicleServiceTest {
 
     @Test
     void createVehicle_ReturnsSavedDTO() {
-        VehicleDTO dto = new VehicleDTO(); dto.setId(1);
-        Vehicle vehicle = new Vehicle(); vehicle.setId(1);
+        VehicleDTO dto = new VehicleDTO();
+        dto.setId(1);
+        Vehicle vehicle = new Vehicle();
+        vehicle.setId(1);
 
         when(vehicleMapper.toEntity(dto)).thenReturn(vehicle);
         when(vehicleRepository.save(vehicle)).thenReturn(vehicle);
@@ -95,8 +119,10 @@ class VehicleServiceTest {
 
     @Test
     void updateVehicle_WhenExists_UpdatesAndReturnsDTO() {
-        Vehicle existing = new Vehicle(); existing.setId(1);
-        VehicleDTO dto = new VehicleDTO(); dto.setId(1);
+        Vehicle existing = new Vehicle();
+        existing.setId(1);
+        VehicleDTO dto = new VehicleDTO();
+        dto.setId(1);
 
         when(vehicleRepository.findById(1)).thenReturn(Optional.of(existing));
         doNothing().when(vehicleMapper).updateVehicleFromDto(dto, existing);
