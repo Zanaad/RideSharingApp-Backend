@@ -24,10 +24,10 @@ public interface UserMapper {
     void updateUserFromDto(UserDTO dto, @MappingTarget User entity);
 
     @Named("mapCompany")
-    default Company mapCompany(String companyId) {
+    default Company mapCompany(Integer companyId) {
         if (companyId == null) return null;
         Company company = new Company();
-        company.setId(Integer.valueOf(companyId));
+        company.setId(companyId);
         return company;
     }
 
