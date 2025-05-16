@@ -3,6 +3,7 @@ package com.ridesharingappbackend.service;
 import com.ridesharingappbackend.dto.UserDTO;
 import com.ridesharingappbackend.mappers.UserMapper;
 import com.ridesharingappbackend.repository.UserRepository;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
@@ -16,8 +17,9 @@ public class UserService {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
     }
-
+    @Cacheable(value = "users", key = "#companyId")
     public List<UserDTO> getAllUsersByCompany(Integer companyId) {
+        System.out.println("Fetching from DB for ID: " + companyId);
         return userRepository.findByCompanyId(companyId).stream()
                 .map(userMapper::toDTO)
                 .collect(Collectors.toList());
