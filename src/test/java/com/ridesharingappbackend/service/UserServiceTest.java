@@ -22,6 +22,9 @@ class UserServiceTest {
     @Mock
     private UserMapper userMapper;
 
+    @Mock
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
     @InjectMocks
     private UserService userService;
 
@@ -57,7 +60,7 @@ class UserServiceTest {
         User user = new User(); user.setId(1); user.setCompany(company);
         UserDTO dto = new UserDTO(); dto.setId(1);
 
-        when(userRepository.findById(1)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndCompanyId(1, companyId)).thenReturn(Optional.of(user));
         when(userMapper.toDTO(user)).thenReturn(dto);
 
         Optional<UserDTO> result = userService.getUserById(1, companyId);
@@ -67,11 +70,8 @@ class UserServiceTest {
     }
 
     @Test
-    void getUserById_WhenCompanyMismatch_ReturnsEmpty() {
-        Company company = new Company(); company.setId(99);
-        User user = new User(); user.setId(1); user.setCompany(company);
-
-        when(userRepository.findById(1)).thenReturn(Optional.of(user));
+    void getUserById_WhenNotFound_ReturnsEmpty() {
+        when(userRepository.findByIdAndCompanyId(1, companyId)).thenReturn(Optional.empty());
 
         Optional<UserDTO> result = userService.getUserById(1, companyId);
 
@@ -84,7 +84,7 @@ class UserServiceTest {
         User user = new User(); user.setId(1); user.setCompany(company);
         UserDTO dto = new UserDTO(); dto.setId(1);
 
-        when(userRepository.findById(1)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndCompanyId(1, companyId)).thenReturn(Optional.of(user));
         doNothing().when(userMapper).updateUserFromDto(dto, user);
         when(userRepository.save(user)).thenReturn(user);
         when(userMapper.toDTO(user)).thenReturn(dto);
@@ -96,16 +96,13 @@ class UserServiceTest {
 
     @Test
     void updateUser_WhenCompanyMismatch_ThrowsException() {
-        Company company = new Company(); company.setId(99);
-        User user = new User(); user.setId(1); user.setCompany(company);
+        when(userRepository.findByIdAndCompanyId(1, companyId)).thenReturn(Optional.empty());
         UserDTO dto = new UserDTO();
-
-        when(userRepository.findById(1)).thenReturn(Optional.of(user));
 
         RuntimeException ex = assertThrows(RuntimeException.class,
                 () -> userService.updateUser(1, dto, companyId));
 
-        assertEquals("User not found or not in your company", ex.getMessage());
+        assertEquals("User not found", ex.getMessage());
     }
 
     @Test
@@ -113,7 +110,7 @@ class UserServiceTest {
         Company company = new Company(); company.setId(companyId);
         User user = new User(); user.setId(1); user.setCompany(company);
 
-        when(userRepository.findById(1)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndCompanyId(1, companyId)).thenReturn(Optional.of(user));
 
         boolean result = userService.deleteUser(1, companyId);
 
@@ -123,10 +120,7 @@ class UserServiceTest {
 
     @Test
     void deleteUser_WhenCompanyMismatch_ReturnsFalse() {
-        Company company = new Company(); company.setId(99);
-        User user = new User(); user.setId(1); user.setCompany(company);
-
-        when(userRepository.findById(1)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndCompanyId(1, companyId)).thenReturn(Optional.empty());
 
         boolean result = userService.deleteUser(1, companyId);
 
@@ -136,10 +130,45 @@ class UserServiceTest {
 
     @Test
     void deleteUser_WhenUserNotFound_ReturnsFalse() {
-        when(userRepository.findById(1)).thenReturn(Optional.empty());
+        when(userRepository.findByIdAndCompanyId(1, companyId)).thenReturn(Optional.empty());
 
         boolean result = userService.deleteUser(1, companyId);
 
         assertFalse(result);
+    }
+
+    @Test
+    void changePassword_WhenCurrentPasswordMatches_ChangesPassword() {
+        User user = new User(); user.setId(1); user.setPassword("encodedOldPassword");
+        when(userRepository.findByIdAndCompanyId(1, companyId)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("oldPass", "encodedOldPassword")).thenReturn(true);
+        when(passwordEncoder.encode("newPass")).thenReturn("encodedNewPass");
+
+        userService.changePassword(1, companyId, "oldPass", "newPass");
+
+        assertEquals("encodedNewPass", user.getPassword());
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void changePassword_WhenCurrentPasswordWrong_ThrowsException() {
+        User user = new User(); user.setId(1); user.setPassword("encodedOldPassword");
+        when(userRepository.findByIdAndCompanyId(1, companyId)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("wrongPass", "encodedOldPassword")).thenReturn(false);
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                userService.changePassword(1, companyId, "wrongPass", "newPass"));
+
+        assertEquals("Current password is incorrect", ex.getMessage());
+    }
+
+    @Test
+    void changePassword_WhenUserNotFound_ThrowsException() {
+        when(userRepository.findByIdAndCompanyId(1, companyId)).thenReturn(Optional.empty());
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                userService.changePassword(1, companyId, "oldPass", "newPass"));
+
+        assertEquals("User not found", ex.getMessage());
     }
 }
