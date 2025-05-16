@@ -4,7 +4,6 @@ import com.ridesharingappbackend.dto.CreateCompanyRequest;
 import com.ridesharingappbackend.mappers.CompanyMapper;
 import com.ridesharingappbackend.models.Company;
 import com.ridesharingappbackend.repository.CompanyRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,9 +33,12 @@ public class CompanyService {
         return companyRepository.findById(id);
     }
 
+    public Optional<Company> getCompanyByDomain(String domain) {
+        return companyRepository.findByDomain(domain);
+    }
+
     public Company updateCompany(Integer id, CreateCompanyRequest dto) {
-        Company company = companyRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Company not found"));
+        Company company = companyRepository.findById(id).orElseThrow(() -> new RuntimeException("Company not found"));
         companyMapper.updateCompanyFromRequest(dto, company);
         return companyRepository.save(company);
     }

@@ -79,16 +79,22 @@ class NotificationsServiceTest {
     void createNotification_SavesAndReturnsDTO() {
         NotificationsDTO dto = new NotificationsDTO();
         dto.setId(1);
+
         Notifications notif = new Notifications();
         notif.setId(1);
 
         when(mapper.toEntity(dto)).thenReturn(notif);
-        when(notificationRepository.save(any(Notifications.class))).thenReturn(notif);
-        when(mapper.toDTO(notif)).thenReturn(dto);
+        when(notificationRepository.save(any(Notifications.class))).thenAnswer(invocation -> {
+            Notifications saved = invocation.getArgument(0);
+            saved.setId(1);
+            return saved;
+        });
+        when(mapper.toDTO(any())).thenReturn(dto);
 
         NotificationsDTO result = notificationsService.createNotification(dto, companyId);
 
         assertEquals(1, result.getId());
+        assertNotNull(notif.getCompany());
         assertEquals(companyId, notif.getCompany().getId());
     }
 
@@ -110,7 +116,7 @@ class NotificationsServiceTest {
         RuntimeException ex = assertThrows(RuntimeException.class,
                 () -> notificationsService.deleteNotification(42, companyId));
 
-        assertEquals("Notification not found or not part of this company", ex.getMessage());
+        assertEquals("Notification not found", ex.getMessage());
     }
 
     @Test
@@ -118,6 +124,7 @@ class NotificationsServiceTest {
         Notifications notif = new Notifications();
         notif.setId(1);
         notif.setIsRead(false);
+
         NotificationsDTO dto = new NotificationsDTO();
         dto.setId(1);
         dto.setIsRead(true);
@@ -130,6 +137,7 @@ class NotificationsServiceTest {
 
         assertTrue(notif.getIsRead());
         assertEquals(1, result.getId());
+        assertTrue(result.getIsRead());
     }
 
     @Test

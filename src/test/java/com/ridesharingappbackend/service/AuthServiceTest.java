@@ -61,7 +61,7 @@ class AuthServiceTest {
         savedUser.setCompany(company);
         savedUser.setRole(role);
 
-        when(userRepo.existsByEmail("test@example.com")).thenReturn(false);
+        when(userRepo.existsByEmailAndCompanyId("test@example.com", 1)).thenReturn(false);
         when(companyRepo.findById(1)).thenReturn(Optional.of(company));
         when(roleRepo.findById(2)).thenReturn(Optional.of(role));
         when(userMapper.fromSignupRequest(request)).thenReturn(user);
@@ -77,11 +77,12 @@ class AuthServiceTest {
     }
 
     @Test
-    void signup_duplicateEmail_throws() {
+    void signup_duplicateEmailAndCompany_throws() {
         SignupRequest request = new SignupRequest();
         request.setEmail("test@example.com");
+        request.setCompanyId(1);
 
-        when(userRepo.existsByEmail("test@example.com")).thenReturn(true);
+        when(userRepo.existsByEmailAndCompanyId("test@example.com", 1)).thenReturn(true);
 
         assertThrows(DuplicateUserException.class, () -> authService.signup(request));
     }
@@ -92,7 +93,7 @@ class AuthServiceTest {
         request.setEmail("test@example.com");
         request.setCompanyId(10);
 
-        when(userRepo.existsByEmail("test@example.com")).thenReturn(false);
+        when(userRepo.existsByEmailAndCompanyId("test@example.com", 10)).thenReturn(false);
         when(companyRepo.findById(10)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> authService.signup(request));
@@ -105,7 +106,7 @@ class AuthServiceTest {
         request.setCompanyId(1);
         request.setRoleId(99);
 
-        when(userRepo.existsByEmail("test@example.com")).thenReturn(false);
+        when(userRepo.existsByEmailAndCompanyId("test@example.com", 1)).thenReturn(false);
         when(companyRepo.findById(1)).thenReturn(Optional.of(new Company()));
         when(roleRepo.findById(99)).thenReturn(Optional.empty());
 
@@ -117,22 +118,24 @@ class AuthServiceTest {
         AuthRequest request = new AuthRequest();
         request.setEmail("test@example.com");
         request.setPassword("secret");
+        Integer companyId = 5;
 
         Role role = new Role();
         role.setName("PASSENGER");
+
         Company company = new Company();
-        company.setId(5);
+        company.setId(companyId);
 
         User user = new User();
         user.setPassword("encodedSecret");
         user.setCompany(company);
         user.setRole(role);
 
-        when(userRepo.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(userRepo.findByEmailAndCompanyId("test@example.com", companyId)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("secret", "encodedSecret")).thenReturn(true);
         when(jwtService.generateToken(user)).thenReturn("loginToken");
 
-        AuthResponse response = authService.login(request);
+        AuthResponse response = authService.login(request, companyId);
 
         assertEquals("loginToken", response.getToken());
         assertEquals("PASSENGER", response.getRole());
@@ -144,23 +147,25 @@ class AuthServiceTest {
         AuthRequest request = new AuthRequest();
         request.setEmail("test@example.com");
         request.setPassword("wrong");
+        Integer companyId = 1;
 
         User user = new User();
         user.setPassword("correctEncoded");
 
-        when(userRepo.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(userRepo.findByEmailAndCompanyId("test@example.com", companyId)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("wrong", "correctEncoded")).thenReturn(false);
 
-        assertThrows(InvalidCredentialsException.class, () -> authService.login(request));
+        assertThrows(InvalidCredentialsException.class, () -> authService.login(request, companyId));
     }
 
     @Test
     void login_userNotFound_throws() {
         AuthRequest request = new AuthRequest();
         request.setEmail("nonexistent@example.com");
+        Integer companyId = 2;
 
-        when(userRepo.findByEmail("nonexistent@example.com")).thenReturn(Optional.empty());
+        when(userRepo.findByEmailAndCompanyId("nonexistent@example.com", companyId)).thenReturn(Optional.empty());
 
-        assertThrows(InvalidCredentialsException.class, () -> authService.login(request));
+        assertThrows(InvalidCredentialsException.class, () -> authService.login(request, companyId));
     }
 }

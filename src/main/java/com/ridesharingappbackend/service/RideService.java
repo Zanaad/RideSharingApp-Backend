@@ -57,7 +57,7 @@ public class RideService {
     }
 
     public RideDTO createRide(RideDTO rideDTO, Integer companyId) {
-        rideDTO.setCompanyId(companyId); // Ensure company is set from authenticated request
+        rideDTO.setCompanyId(companyId);
         Ride ride = rideMapper.toEntity(rideDTO);
         return rideMapper.toDTO(rideRepository.save(ride));
     }
