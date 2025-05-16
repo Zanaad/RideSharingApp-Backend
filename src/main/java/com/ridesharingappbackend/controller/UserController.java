@@ -18,6 +18,7 @@ public class UserController {
 
     @GetMapping
     public List<UserDTO> getAllUsers(HttpServletRequest request) {
+        System.out.println("User Controller");
         Integer companyId = (Integer) request.getAttribute("companyId");
         return userService.getAllUsersByCompany(companyId);
     }

@@ -4,6 +4,8 @@ import com.ridesharingappbackend.dto.PermissionCheckRequest;
 import com.ridesharingappbackend.models.Permission;
 import com.ridesharingappbackend.models.RolePermission;
 import com.ridesharingappbackend.repository.RolePermissionRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,16 +19,18 @@ public class AccessControlService {
         this.rolePermissionRepository = rolePermissionRepository;
     }
 
-    /**
-     * Checks whether a role has permission for a given HTTP verb and exact path.
-     *
-     * @param roleId The ID of the role assigned to the user
-     * @param verb   HTTP method (GET, POST, PUT, DELETE)
-     * @param path   The exact request path (e.g., /api/v1/users/1)
-     * @return true if access is allowed, false otherwise
-     */
+    //Cashes permissions
+    @Cacheable(value = "role-permissions", key = "#roleId")
+    public List<RolePermission> getPermissionsByRole(Integer roleId) {
+        System.out.println("Premissions");
+        System.out.println("roleId " + roleId);
+        return rolePermissionRepository.findAllByRoleId(roleId);
+    }
+
+
+     // Uses cached permissions to check access rights.
     public boolean isAccessAllowed(PermissionCheckRequest req) {
-        List<RolePermission> permissions = rolePermissionRepository.findAllByRoleId(req.getRoleId());
+        List<RolePermission> permissions = getPermissionsByRole(req.getRoleId());
 
         return permissions.stream().anyMatch(rp ->
                 rp.getPermission().getVerb().name().equalsIgnoreCase(req.getVerb()) &&
@@ -34,4 +38,8 @@ public class AccessControlService {
         );
     }
 
+    @CacheEvict(value = "role-permissions", key = "#roleId")
+    public void evictRolePermissionCache(Integer roleId) {
+        System.out.println("Evicted cached permissions for role: " + roleId);
+    }
 }
