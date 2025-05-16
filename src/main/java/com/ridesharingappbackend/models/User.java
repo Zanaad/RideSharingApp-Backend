@@ -44,4 +44,15 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+    public void setId(Integer id) {
+        this.id = id;
+    }
 }

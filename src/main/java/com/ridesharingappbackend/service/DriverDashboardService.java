@@ -1,46 +1,100 @@
 package com.ridesharingappbackend.service;
 
 import com.ridesharingappbackend.dto.DriverDashboardDTO;
+import com.ridesharingappbackend.dto.RideDTO;
+import com.ridesharingappbackend.dto.VehicleDTO;
+import com.ridesharingappbackend.enums.RideStatus;
+import com.ridesharingappbackend.enums.VehicleType;
+import com.ridesharingappbackend.exceptions.ResourceNotFoundException;
 import com.ridesharingappbackend.models.Driver;
 import com.ridesharingappbackend.models.DriverLicense;
+import com.ridesharingappbackend.models.Ride;
+import com.ridesharingappbackend.models.Vehicle;
 import com.ridesharingappbackend.repository.DriverLicenseRepository;
 import com.ridesharingappbackend.repository.DriverRepository;
+import com.ridesharingappbackend.repository.RideRepository;
+import com.ridesharingappbackend.repository.VehicleRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+ import lombok.Builder;
+ import lombok.Data;
 import java.util.Comparator;
 import java.util.List;
 
+
 @Service
+@RequiredArgsConstructor
 public class DriverDashboardService {
 
-    private final DriverRepository driverRepository;
-    private final DriverLicenseRepository licenseRepository;
+    @Autowired
+    private DriverRepository driverRepository;
 
-    public DriverDashboardService(DriverRepository driverRepository, DriverLicenseRepository licenseRepository) {
-        this.driverRepository = driverRepository;
-        this.licenseRepository = licenseRepository;
+    @Autowired
+    private RideRepository rideRepository;
+
+    @Autowired
+    private VehicleRepository vehicleRepository;
+
+    public DriverDashboardDTO getDashboardByUserId(Long userId) {
+        // Merr drejtuesin përmes userId
+        Driver driver = driverRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Driver not found"));
+
+        // Numri i udhëtimeve të përfunduara
+
+        // Fitimet totale
+
+
+        // Udhëtimi aktual nëse ekziston
+
+
+        // Automjeti i lidhur me shoferin
+        VehicleDTO vehicle = null;
+        Vehicle vehicleEntity = vehicleRepository.findByDriverId(driver.getId());
+        if (vehicleEntity != null) {
+            vehicle = convertToVehicleDTO(vehicleEntity);
+        }
+
+        // Emri i plotë i shoferit
+        String fullName = driver.getUser().getFirstName() + " " + driver.getUser().getLastName();
+
+        // Emri i kompanisë (nëse ka)
+        String companyName = driver.getCompany() != null ? driver.getCompany().getName() : null;
+
+        // Kthimi i të dhënave në DTO
+        return new DriverDashboardDTO(
+                driver.getId(),
+                fullName,
+                driver.getRating(),
+                driver.getStatus()
+             /*   driver.getLicenseNumber()*/
+        );
+
     }
 
-    public DriverDashboardDTO getDashboardData(Integer driverId) {
-        Driver driver = driverRepository.findById(driverId)
-                .orElseThrow(() -> new RuntimeException("Driver not found"));
+    // Konvertimi i Ride në DTO
+    private RideDTO convertToRideDTO(Ride ride) {
+        RideDTO dto = new RideDTO();
+        dto.setId(ride.getId());
+        dto.setStatus(RideStatus.COMPLETED);
+        dto.setPickupLocation(ride.getPickupLocation());
+        dto.setDropOffLocation(ride.getDropOffLocation());
+        dto.setPickupTime(ride.getPickupTime());
+        return dto;
+    }
 
-        String fullName = driver.getUser().getFirstName() + " " + driver.getUser().getLastName();
-        String companyName = driver.getCompany().getName();
-        float rating = driver.getRating();
-        String status = driver.getStatus().name();
-
-        // Më e fundit (supozojmë se ka vetëm një për tani)
-        List<DriverLicense> licenses = licenseRepository.findAll();
-        DriverLicense currentLicense = licenses.stream()
-                .filter(l -> l.getDriver().getId().equals(driverId))
-                .max(Comparator.comparing(DriverLicense::getCreatedAt))
-                .orElse(null);
-
-        String licenseNumber = currentLicense != null ? currentLicense.getLicenseNumber() : "N/A";
-        var expiry = currentLicense != null ? currentLicense.getExpirationDate() : null;
-
-        // Po e vendosim statikisht totalTrips = 0 për tani, nëse s'ke tabelë të udhëtimeve
-    return new DriverDashboardDTO(fullName, companyName, rating, status, 0, licenseNumber, expiry);
+    // Konvertimi i Vehicle në DTO
+    private VehicleDTO convertToVehicleDTO(Vehicle vehicle) {
+        VehicleDTO dto = new VehicleDTO();
+        dto.setBrand(vehicle.getBrand());
+        dto.setColor(vehicle.getColor());
+        dto.setModel(vehicle.getModel());
+        dto.setPlateNumber(vehicle.getPlateNumber());
+        dto.setVehicleType(VehicleType.MOTORBIKE);
+        return dto;
     }
 }
+
+
+

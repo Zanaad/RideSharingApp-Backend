@@ -35,4 +35,11 @@ public class Company {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+    public String getName() {
+        return name;
+    }
+    public void setId(Integer id) {
+        this.id = id;
+    }
 }

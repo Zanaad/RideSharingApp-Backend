@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "drivers")
 @Getter
@@ -30,6 +32,21 @@ public class Driver {
     @ManyToOne
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
+
+   /* private String license_number;*/
+
+
+
+    public Integer getId() { return id; }
+    public User getUser() { return user; }
+    public Company getCompany() { return company; }
+    public DriverStatus getStatus() { return status; }
+    public float getRating() { return rating; }
+    /*public String getLicenseNumber() { return license_number; }*/
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 }
 
 

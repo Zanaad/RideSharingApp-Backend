@@ -60,4 +60,15 @@ public class Ride {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
+
+    public Integer getId() { return id; }
+    public void setId(Integer id) {
+        this.id = id;
+    }
+    public RideStatus getStatus() { return status; }
+    public String getPickupLocation() { return pickupLocation; }
+    public String getDropOffLocation() { return dropOffLocation; }
+    public LocalDateTime getPickupTime() { return pickupTime; }
+
+
 }
