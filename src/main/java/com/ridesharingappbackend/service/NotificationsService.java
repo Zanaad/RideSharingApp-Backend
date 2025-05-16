@@ -44,7 +44,7 @@ public class NotificationsService {
 
     public void deleteNotification(Integer id, Integer companyId) {
         Notifications notification = notificationRepository.findByIdAndCompanyId(id, companyId)
-                .orElseThrow(() -> new RuntimeException("Notification not found or not part of this company"));
+                .orElseThrow(() -> new RuntimeException("Notification not found"));
         notificationRepository.delete(notification);
     }
 

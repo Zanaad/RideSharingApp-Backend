@@ -2,13 +2,17 @@ package com.ridesharingappbackend.service;
 
 import com.ridesharingappbackend.dto.VehicleDTO;
 import com.ridesharingappbackend.mappers.VehicleMapper;
+import com.ridesharingappbackend.models.Company;
 import com.ridesharingappbackend.models.Vehicle;
 import com.ridesharingappbackend.repository.VehicleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -30,7 +34,7 @@ class VehicleServiceTest {
     }
 
     @Test
-    void getAllVehicles_WithCompanyId_ReturnsFilteredList() {
+    void getAllVehiclesByCompany_ReturnsList() {
         Vehicle vehicle = new Vehicle();
         vehicle.setId(1);
         VehicleDTO dto = new VehicleDTO();
@@ -39,66 +43,73 @@ class VehicleServiceTest {
         when(vehicleRepository.findByCompanyId(10)).thenReturn(List.of(vehicle));
         when(vehicleMapper.toDTO(vehicle)).thenReturn(dto);
 
-        List<VehicleDTO> result = vehicleService.getAllVehicles(10);
+        List<VehicleDTO> result = vehicleService.getAllVehiclesByCompany(10);
 
         assertEquals(1, result.size());
         assertEquals(1, result.get(0).getId());
     }
 
     @Test
-    void getAllVehicles_WithoutCompanyId_ReturnsAll() {
-        Vehicle vehicle = new Vehicle();
-        vehicle.setId(2);
-        VehicleDTO dto = new VehicleDTO();
-        dto.setId(2);
-
-        when(vehicleRepository.findAll()).thenReturn(List.of(vehicle));
-        when(vehicleMapper.toDTO(vehicle)).thenReturn(dto);
-
-        List<VehicleDTO> result = vehicleService.getAllVehicles(null);
-
-        assertEquals(1, result.size());
-        assertEquals(2, result.get(0).getId());
-    }
-
-    @Test
-    void getVehicleById_WhenExists_ReturnsDTO() {
+    void getVehicleByIdAndCompanyId_WhenExists_ReturnsDTO() {
         Vehicle vehicle = new Vehicle();
         vehicle.setId(1);
+        Company company = new Company();
+        company.setId(10);
+        vehicle.setCompany(company);
+
         VehicleDTO dto = new VehicleDTO();
         dto.setId(1);
 
-        when(vehicleRepository.findById(1)).thenReturn(Optional.of(vehicle));
+        when(vehicleRepository.findByIdAndCompanyId(1, 10)).thenReturn(Optional.of(vehicle));
         when(vehicleMapper.toDTO(vehicle)).thenReturn(dto);
 
-        Optional<VehicleDTO> result = vehicleService.getVehicleById(1);
+        Optional<VehicleDTO> result = vehicleService.getVehicleByIdAndCompanyId(1, 10);
 
         assertTrue(result.isPresent());
         assertEquals(1, result.get().getId());
     }
 
     @Test
-    void getVehicleById_WhenNotExists_ReturnsEmptyOptional() {
-        when(vehicleRepository.findById(99)).thenReturn(Optional.empty());
+    void getVehicleByIdAndCompanyId_WhenNotExists_ReturnsEmpty() {
+        when(vehicleRepository.findByIdAndCompanyId(1, 10)).thenReturn(Optional.empty());
 
-        Optional<VehicleDTO> result = vehicleService.getVehicleById(99);
+        Optional<VehicleDTO> result = vehicleService.getVehicleByIdAndCompanyId(1, 10);
 
         assertFalse(result.isPresent());
     }
 
     @Test
-    void getVehicleByDriverId_ReturnsDTO() {
+    void getVehicleByDriverIdAndCompanyId_WhenBelongsToCompany_ReturnsDTO() {
         Vehicle vehicle = new Vehicle();
         vehicle.setId(1);
+        Company company = new Company();
+        company.setId(10);
+        vehicle.setCompany(company);
+
         VehicleDTO dto = new VehicleDTO();
         dto.setId(1);
 
-        when(vehicleRepository.findByDriverId(10)).thenReturn(vehicle);
+        when(vehicleRepository.findByDriverId(5)).thenReturn(vehicle);
         when(vehicleMapper.toDTO(vehicle)).thenReturn(dto);
 
-        VehicleDTO result = vehicleService.getVehicleByDriverId(10);
+        Optional<VehicleDTO> result = vehicleService.getVehicleByDriverIdAndCompanyId(5, 10);
 
-        assertEquals(1, result.getId());
+        assertTrue(result.isPresent());
+        assertEquals(1, result.get().getId());
+    }
+
+    @Test
+    void getVehicleByDriverIdAndCompanyId_WhenNotBelongsToCompany_ReturnsEmpty() {
+        Vehicle vehicle = new Vehicle();
+        Company company = new Company();
+        company.setId(99); // different company
+        vehicle.setCompany(company);
+
+        when(vehicleRepository.findByDriverId(5)).thenReturn(vehicle);
+
+        Optional<VehicleDTO> result = vehicleService.getVehicleByDriverIdAndCompanyId(5, 10);
+
+        assertFalse(result.isPresent());
     }
 
     @Test
@@ -118,52 +129,61 @@ class VehicleServiceTest {
     }
 
     @Test
-    void updateVehicle_WhenExists_UpdatesAndReturnsDTO() {
+    void updateVehicle_WhenVehicleExists_ReturnsUpdatedDTO() {
         Vehicle existing = new Vehicle();
         existing.setId(1);
+        Company company = new Company();
+        company.setId(10);
+        existing.setCompany(company);
+
         VehicleDTO dto = new VehicleDTO();
         dto.setId(1);
 
-        when(vehicleRepository.findById(1)).thenReturn(Optional.of(existing));
+        when(vehicleRepository.findByIdAndCompanyId(1, 10)).thenReturn(Optional.of(existing));
         doNothing().when(vehicleMapper).updateVehicleFromDto(dto, existing);
         when(vehicleRepository.save(existing)).thenReturn(existing);
         when(vehicleMapper.toDTO(existing)).thenReturn(dto);
 
-        VehicleDTO result = vehicleService.updateVehicle(1, dto);
+        VehicleDTO result = vehicleService.updateVehicle(1, 10, dto);
 
         assertEquals(1, result.getId());
     }
 
     @Test
-    void updateVehicle_WhenNotExists_ThrowsException() {
+    void updateVehicle_WhenVehicleNotFound_ThrowsException() {
         VehicleDTO dto = new VehicleDTO();
 
-        when(vehicleRepository.findById(999)).thenReturn(Optional.empty());
+        when(vehicleRepository.findByIdAndCompanyId(999, 10)).thenReturn(Optional.empty());
 
         RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> vehicleService.updateVehicle(999, dto));
+                () -> vehicleService.updateVehicle(999, 10, dto));
 
-        assertEquals("Vehicle not found", ex.getMessage());
+        assertEquals("Vehicle not found or does not belong to the company", ex.getMessage());
     }
 
     @Test
-    void deleteVehicle_WhenExists_ReturnsTrue() {
-        when(vehicleRepository.existsById(1)).thenReturn(true);
-        doNothing().when(vehicleRepository).deleteById(1);
+    void deleteVehicle_WhenVehicleExists_ReturnsTrue() {
+        Vehicle vehicle = new Vehicle();
+        Company company = new Company();
+        company.setId(10);
+        vehicle.setCompany(company);
 
-        boolean result = vehicleService.deleteVehicle(1);
+        when(vehicleRepository.findByIdAndCompanyId(1, 10)).thenReturn(Optional.of(vehicle));
+        doNothing().when(vehicleRepository).delete(vehicle);
+
+        boolean result = vehicleService.deleteVehicle(1, 10);
 
         assertTrue(result);
-        verify(vehicleRepository).deleteById(1);
+        verify(vehicleRepository).delete(vehicle);
     }
 
     @Test
-    void deleteVehicle_WhenNotExists_ReturnsFalse() {
-        when(vehicleRepository.existsById(2)).thenReturn(false);
+    void deleteVehicle_WhenVehicleNotFound_ReturnsFalse() {
+        when(vehicleRepository.findByIdAndCompanyId(2, 10)).thenReturn(Optional.empty());
 
-        boolean result = vehicleService.deleteVehicle(2);
+        boolean result = vehicleService.deleteVehicle(2, 10);
 
         assertFalse(result);
-        verify(vehicleRepository, never()).deleteById(any());
+        verify(vehicleRepository, never()).delete(any());
     }
 }

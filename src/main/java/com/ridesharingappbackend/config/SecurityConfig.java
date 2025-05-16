@@ -41,6 +41,7 @@ public class SecurityConfig {
                                 "/api/auth/**",
                                 "/v3/api-docs/**",
                                 "/api/companies",
+                                "/api/companies/domain/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll() // Allow these endpoints without auth

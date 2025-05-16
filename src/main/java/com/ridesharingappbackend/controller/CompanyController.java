@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/companies")
@@ -28,9 +29,13 @@ public class CompanyController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Company> getById(@PathVariable Integer id) {
-        return companyService.getCompanyById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return companyService.getCompanyById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/domain/{domain}")
+    public ResponseEntity<Void> checkCompanyDomain(@PathVariable String domain) {
+        Optional<Company> optional = companyService.getCompanyByDomain(domain);
+        return optional.isPresent() ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
     }
 
     @PutMapping("/{id}")

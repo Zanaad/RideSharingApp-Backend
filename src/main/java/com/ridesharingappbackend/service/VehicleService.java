@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class VehicleService {
+
     private final VehicleRepository vehicleRepository;
     private final VehicleMapper vehicleMapper;
 
@@ -20,24 +21,10 @@ public class VehicleService {
         this.vehicleMapper = vehicleMapper;
     }
 
-    public List<VehicleDTO> getAllVehicles(Integer companyId) {
-        if (companyId != null) {
-            return getVehiclesByCompanyId(companyId);
-        }
-        return vehicleRepository.findAll().stream()
-                .map(vehicleMapper::toDTO)
-                .collect(Collectors.toList());
-    }
-
-    public List<VehicleDTO> getVehiclesByCompanyId(Integer companyId) {
+    public List<VehicleDTO> getAllVehiclesByCompany(Integer companyId) {
         return vehicleRepository.findByCompanyId(companyId).stream()
                 .map(vehicleMapper::toDTO)
                 .collect(Collectors.toList());
-    }
-
-    public Optional<VehicleDTO> getVehicleById(Integer id) {
-        return vehicleRepository.findById(id)
-                .map(vehicleMapper::toDTO);
     }
 
     public Optional<VehicleDTO> getVehicleByIdAndCompanyId(Integer id, Integer companyId) {
@@ -45,9 +32,10 @@ public class VehicleService {
                 .map(vehicleMapper::toDTO);
     }
 
-    public VehicleDTO getVehicleByDriverId(Integer driverId) {
-        Vehicle vehicle = vehicleRepository.findByDriverId(driverId);
-        return vehicleMapper.toDTO(vehicle);
+    public Optional<VehicleDTO> getVehicleByDriverIdAndCompanyId(Integer driverId, Integer companyId) {
+        return Optional.ofNullable(vehicleRepository.findByDriverId(driverId))
+                .filter(vehicle -> vehicle.getCompany().getId().equals(companyId))
+                .map(vehicleMapper::toDTO);
     }
 
     public VehicleDTO createVehicle(VehicleDTO vehicleDTO) {
@@ -55,24 +43,21 @@ public class VehicleService {
         return vehicleMapper.toDTO(vehicleRepository.save(vehicle));
     }
 
-    public VehicleDTO updateVehicle(Integer id, VehicleDTO updatedDto) {
-        return vehicleRepository.findById(id)
+    public VehicleDTO updateVehicle(Integer id, Integer companyId, VehicleDTO updatedDto) {
+        return vehicleRepository.findByIdAndCompanyId(id, companyId)
                 .map(existing -> {
                     vehicleMapper.updateVehicleFromDto(updatedDto, existing);
                     return vehicleMapper.toDTO(vehicleRepository.save(existing));
                 })
-                .orElseThrow(() -> new RuntimeException("Vehicle not found"));
+                .orElseThrow(() -> new RuntimeException("Vehicle not found or does not belong to the company"));
     }
 
-    public boolean deleteVehicle(Integer id) {
-        if (vehicleRepository.existsById(id)) {
-            vehicleRepository.deleteById(id);
-            return true;
-        }
-        return false;
-    }
-
-    public boolean existsByIdAndCompanyId(Integer id, Integer companyId) {
-        return vehicleRepository.existsByIdAndCompanyId(id, companyId);
+    public boolean deleteVehicle(Integer id, Integer companyId) {
+        return vehicleRepository.findByIdAndCompanyId(id, companyId)
+                .map(vehicle -> {
+                    vehicleRepository.delete(vehicle);
+                    return true;
+                })
+                .orElse(false);
     }
 }

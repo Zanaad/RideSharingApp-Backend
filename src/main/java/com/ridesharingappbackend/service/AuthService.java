@@ -41,8 +41,8 @@ public class AuthService {
     private UserMapper userMapper;
 
     public AuthResponse signup(SignupRequest request) {
-        if (userRepo.existsByEmail(request.getEmail())) {
-            throw new DuplicateUserException("User with this email already exists");
+        if (userRepo.existsByEmailAndCompanyId(request.getEmail(), request.getCompanyId())) {
+            throw new DuplicateUserException("User already registered");
         }
 
         Company company = companyRepo.findById(request.getCompanyId())
@@ -51,7 +51,6 @@ public class AuthService {
         Role role = roleRepo.findById(request.getRoleId())
                 .orElseThrow(() -> new ResourceNotFoundException("Role not found"));
 
-        // Map SignupRequest to User (excluding role & company)
         User user = userMapper.fromSignupRequest(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setCreatedAt(LocalDateTime.now());
@@ -64,8 +63,8 @@ public class AuthService {
         return new AuthResponse(token, role.getName(), company.getId());
     }
 
-    public AuthResponse login(AuthRequest request) {
-        User user = userRepo.findByEmail(request.getEmail())
+    public AuthResponse login(AuthRequest request, Integer companyId) {
+        User user = userRepo.findByEmailAndCompanyId(request.getEmail(), companyId)
                 .orElseThrow(() -> new InvalidCredentialsException("Invalid credentials"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
@@ -75,4 +74,5 @@ public class AuthService {
         String token = jwtService.generateToken(user);
         return new AuthResponse(token, user.getRole().getName(), user.getCompany().getId());
     }
+
 }
