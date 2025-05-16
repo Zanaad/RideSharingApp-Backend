@@ -16,20 +16,18 @@ import lombok.Setter;
 public class Driver {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
+    private Float rating;
+
+    @Enumerated(EnumType.STRING)
+    private DriverStatus status;
 
     @OneToOne
     @JoinColumn(name = "user_id", unique = true)
     private User user;
 
-    private float rating;
+    @OneToOne(mappedBy = "driver")
+    private Vehicle vehicle;
 
-    @Enumerated(EnumType.STRING)
-    private DriverStatus status;
-
-    @ManyToOne
-    @JoinColumn(name = "company_id", nullable = false)
-    private Company company;
+   //
 }
-
-
