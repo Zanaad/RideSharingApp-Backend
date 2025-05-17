@@ -1,14 +1,10 @@
 package com.ridesharingappbackend.config;
 
 import com.ridesharingappbackend.dto.ApiError;
-import com.ridesharingappbackend.exceptions.BaseException;
-import com.ridesharingappbackend.exceptions.DuplicateUserException;
-import com.ridesharingappbackend.exceptions.InvalidCredentialsException;
-import com.ridesharingappbackend.exceptions.ResourceNotFoundException;
+import com.ridesharingappbackend.exceptions.*;
 import com.ridesharingappbackend.utils.ErrorResponseWriter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -46,6 +42,14 @@ public class GlobalExceptionHandler {
         ex.printStackTrace();
         return ErrorResponseWriter.toResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error occurred: " + ex.getMessage());
     }
+
+    @ExceptionHandler(InvalidOrExpiredTokenException.class)
+    public ResponseEntity<?> handleInvalidOrExpiredToken(InvalidOrExpiredTokenException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ex.getMessage());
+    }
+
 
     private HttpStatus determineStatus(BaseException ex) {
         if (ex instanceof InvalidCredentialsException) return HttpStatus.UNAUTHORIZED;

@@ -35,7 +35,9 @@ public class AuthorizationFilter extends OncePerRequestFilter {
                 path.startsWith("/swagger-ui") ||
                 path.startsWith("/v3/api-docs") ||
                 path.equals("/swagger-ui.html") ||
-                path.equals("/api/companies")) {
+                path.equals("/api/companies") ||
+                path.startsWith("/api/companies/domain")
+        ) {
             filterChain.doFilter(request, response);
             return;
         }

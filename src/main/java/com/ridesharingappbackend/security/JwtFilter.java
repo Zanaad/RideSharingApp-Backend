@@ -40,23 +40,23 @@ public class JwtFilter extends OncePerRequestFilter {
                 Claims claims = jwtService.extractClaims(token);
 
                 Integer companyId = claims.get("companyId", Integer.class);
-                request.setAttribute("companyId", companyId);
-                String email = claims.getSubject();
+                Integer userId = claims.get("userId", Integer.class);
                 Integer roleId = claims.get("roleId", Integer.class);
+                String email = claims.getSubject();
 
                 if (roleId == null || email == null) {
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing roleId or email in token");
                     return;
                 }
+                request.setAttribute("companyId", companyId);
+                request.setAttribute("userId", userId);
+                request.setAttribute("claims", claims);
 
                 // Set authentication context
                 SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + roleId);
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(email, null, List.of(authority));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
-
-                // Pass claims for later use
-                request.setAttribute("claims", claims);
 
             } catch (Exception ex) {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired token");

@@ -2,6 +2,7 @@ package com.ridesharingappbackend.controller;
 
 import com.ridesharingappbackend.dto.DriverDTO;
 import com.ridesharingappbackend.service.DriverService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,8 @@ public class DriverController {
         this.driverService = driverService;
     }
 
+
+    /*
     @GetMapping
     public List<DriverDTO> getAllDrivers(HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
@@ -59,5 +62,6 @@ public class DriverController {
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
-    }
+    }*/
+
 }

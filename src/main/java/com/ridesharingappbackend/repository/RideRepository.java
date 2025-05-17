@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface RideRepository extends JpaRepository<Ride, Integer> {
     List<Ride> findByPassengerId(Integer passengerId);
@@ -26,4 +27,14 @@ public interface RideRepository extends JpaRepository<Ride, Integer> {
     @Query("SELECT r FROM Ride r WHERE r.company.id = :companyId AND r.passenger.id = :passengerId")
     List<Ride> findByCompanyAndPassenger(@Param("companyId") Integer companyId,
                                          @Param("passengerId") Integer passengerId);
+
+    @Query("SELECT COUNT(r) FROM Ride r WHERE r.driver.id= :driverId AND r.status = 'COMPLETED' ")
+    Long countCompletedRides(@Param("driverId") Long driverId);
+
+    @Query("SELECT SUM(r.fare) FROM Ride r WHERE r.driver.id = :driverId AND r.status = 'COMPLETED'")
+    Double sumTotalEarnings(@Param("driverId") Long driverId);
+
+    @Query("SELECT r FROM Ride r WHERE r.driver.id = :driverId AND r.status IN ('ONGOING', 'ACCEPTED')")
+    Optional<Ride> findCurrentRide(@Param("driverId") Long driverId);
+
 }
