@@ -50,7 +50,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         // Extract role and HTTP method, then check access control
         Integer roleId = claims.get("roleId", Integer.class);
         String method = request.getMethod();
-
+        System.out.println(path);
         PermissionCheckRequest permissionRequest = new PermissionCheckRequest();
         permissionRequest.setRoleId(roleId);
         permissionRequest.setVerb(method);
