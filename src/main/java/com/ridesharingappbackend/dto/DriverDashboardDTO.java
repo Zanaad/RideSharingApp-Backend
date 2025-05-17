@@ -6,16 +6,18 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Data;
 
 
-/*@Getter
-@Setter*/
+@Getter
+@Setter
 @NoArgsConstructor
-
+@AllArgsConstructor
 public class DriverDashboardDTO {
 
     private Integer driverId;
@@ -26,13 +28,13 @@ public class DriverDashboardDTO {
     /*private String license_number;*/
 
 
- public DriverDashboardDTO(Integer driverId, String fullName, float rating, DriverStatus status) {
+ /*public DriverDashboardDTO(Integer driverId, String fullName, float rating, DriverStatus status) {
   this.driverId = driverId;
   this.fullName = fullName;
   this.rating = rating;
   this.status = status;
 
-/*  this.license_number = license_number;*/
+*//*  this.license_number = license_number;*//*
 
  }
     public Integer getDriverId() { return driverId; }
@@ -45,5 +47,5 @@ public class DriverDashboardDTO {
     public void setRating(float rating) { this.rating = rating; }
 
     public DriverStatus getStatus() { return status; }
-    public void setStatus(DriverStatus status) { this.status = status; }
+    public void setStatus(DriverStatus status) { this.status = status; }*/
 }
