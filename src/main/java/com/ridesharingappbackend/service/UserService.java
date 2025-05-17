@@ -3,6 +3,7 @@ package com.ridesharingappbackend.service;
 import com.ridesharingappbackend.dto.UserDTO;
 import com.ridesharingappbackend.mappers.UserMapper;
 import com.ridesharingappbackend.repository.UserRepository;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,8 +22,9 @@ public class UserService {
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
     }
-
+    @Cacheable(value = "users", key = "#companyId")
     public List<UserDTO> getAllUsersByCompany(Integer companyId) {
+        System.out.println("Fetching from DB for ID: " + companyId);
         return userRepository.findByCompanyId(companyId).stream()
                 .map(userMapper::toDTO)
                 .collect(Collectors.toList());
