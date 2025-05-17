@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RideDTO {
-    private Integer id;
+    private int id;
     private Integer passengerId;
     private Integer driverId;
     private String pickupLocation;
@@ -26,4 +26,19 @@ public class RideDTO {
     private double fare;
     private LocalDateTime pickupTime;
     private Integer companyId;
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+
+    public RideStatus getStatus() { return status; }
+        public void setStatus(RideStatus status) { this.status=status; }
+
+    public String getPickupLocation() { return pickupLocation; }
+    public void setPickupLocation(String pickupLocation) { this.pickupLocation = pickupLocation; }
+
+    public String getDropOffLocation() { return dropOffLocation; }
+    public void setDropOffLocation(String dropOffLocation) { this.dropOffLocation = dropOffLocation; }
+
+    public LocalDateTime getPickupTime() { return pickupTime; }
+    public void setPickupTime(LocalDateTime pickupTime) { this.pickupTime = pickupTime; }
+
 }

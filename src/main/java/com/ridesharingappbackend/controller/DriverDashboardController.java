@@ -15,13 +15,13 @@ public class DriverDashboardController {
         this.dashboardService = dashboardService;
     }
 
-    @GetMapping("/driver/{driverId}")
-    public ResponseEntity<DriverDashboardDTO> getDriverDashboard(@PathVariable Integer driverId) {
-        try {
-            DriverDashboardDTO dto = dashboardService.getDashboardData(driverId);
-            return ResponseEntity.ok(dto);
-        } catch (RuntimeException e) {
+
+    @GetMapping
+    public ResponseEntity<DriverDashboardDTO> getDashboard(@RequestParam Long userId) {
+        DriverDashboardDTO dto = dashboardService.getDashboardByUserId(userId);
+        if (dto == null) {
             return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.ok(dto);
     }
 }
