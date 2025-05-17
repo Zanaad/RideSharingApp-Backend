@@ -1,8 +1,6 @@
 package com.ridesharingappbackend.controller;
 
-import com.ridesharingappbackend.dto.AuthRequest;
-import com.ridesharingappbackend.dto.AuthResponse;
-import com.ridesharingappbackend.dto.SignupRequest;
+import com.ridesharingappbackend.dto.*;
 import com.ridesharingappbackend.exceptions.ResourceNotFoundException;
 import com.ridesharingappbackend.models.Company;
 import com.ridesharingappbackend.repository.CompanyRepository;
@@ -23,21 +21,30 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<AuthResponse> signup(@RequestBody SignupRequest request,
-                                               @RequestHeader("X-Company-Domain") String companyDomain) {
-        Company company = companyRepo.findByDomain(companyDomain)
-                .orElseThrow(() -> new ResourceNotFoundException("Company not found"));
+    public ResponseEntity<AuthResponse> signup(@RequestBody SignupRequest request, @RequestHeader("X-Company-Domain") String companyDomain) {
+        Company company = companyRepo.findByDomain(companyDomain).orElseThrow(() -> new ResourceNotFoundException("Company not found"));
 
         request.setCompanyId(company.getId());
         return ResponseEntity.ok(authService.signup(request));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request,
-                                              @RequestHeader("X-Company-Domain") String companyDomain) {
-        Company company = companyRepo.findByDomain(companyDomain)
-                .orElseThrow(() -> new ResourceNotFoundException("Company not found"));
+    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request, @RequestHeader("X-Company-Domain") String companyDomain) {
+        Company company = companyRepo.findByDomain(companyDomain).orElseThrow(() -> new ResourceNotFoundException("Company not found"));
 
         return ResponseEntity.ok(authService.login(request, company.getId()));
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        authService.initiatePasswordReset(request.getEmail(), request.getCompanyDomain());
+        return ResponseEntity.ok("Reset link sent");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request.getToken(), request.getNewPassword());
+        return ResponseEntity.ok("Password successfully changed");
+    }
+
 }
