@@ -4,6 +4,7 @@ import com.ridesharingappbackend.dto.CachedPermissionDTO;
 import com.ridesharingappbackend.dto.PermissionCheckRequest;
 import com.ridesharingappbackend.models.RolePermission;
 import org.springframework.stereotype.Service;
+import org.springframework.util.AntPathMatcher;
 
 import java.util.List;
 
@@ -11,7 +12,7 @@ import java.util.List;
 public class AccessControlService {
 
     private final PermissionService permissionService;
-
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
     public AccessControlService(PermissionService permissionService) {
         this.permissionService = permissionService;
     }
@@ -24,7 +25,7 @@ public class AccessControlService {
 
         return permissions.stream().anyMatch(p ->
                 p.getVerb().equalsIgnoreCase(req.getVerb()) &&
-                        p.getResource().equalsIgnoreCase(req.getPath())
+                        pathMatcher.match(p.getResource(), req.getPath())
         );
     }
 }
