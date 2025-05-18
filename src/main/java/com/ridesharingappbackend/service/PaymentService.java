@@ -2,10 +2,14 @@ package com.ridesharingappbackend.service;
 
 import com.ridesharingappbackend.dto.PaymentDTO;
 import com.ridesharingappbackend.enums.PaymentStatus;
+import com.ridesharingappbackend.exceptions.ResourceNotFoundException;
 import com.ridesharingappbackend.mappers.PaymentMapper;
 import com.ridesharingappbackend.models.Company;
 import com.ridesharingappbackend.models.Payment;
+import com.ridesharingappbackend.models.Ride;
 import com.ridesharingappbackend.repository.PaymentRepository;
+import com.ridesharingappbackend.repository.RideRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,6 +20,9 @@ import java.util.stream.Collectors;
 public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final PaymentMapper paymentMapper;
+
+    @Autowired
+    private RideRepository rideRepo;
 
     public PaymentService(PaymentRepository paymentRepository, PaymentMapper paymentMapper) {
         this.paymentRepository = paymentRepository;
@@ -50,9 +57,19 @@ public class PaymentService {
 
     public PaymentDTO createPayment(PaymentDTO dto, Integer companyId) {
         Payment payment = paymentMapper.toEntity(dto);
+
+        // Set company
         Company company = new Company();
         company.setId(companyId);
         payment.setCompany(company);
+
+        // Set ride
+        Ride ride = rideRepo.findById(dto.getRideId()).orElseThrow(() -> new ResourceNotFoundException("Ride not found"));
+        payment.setRide(ride);
+
+        // Set user (from ride's passenger)
+        payment.setUser(ride.getPassenger());
+
         return paymentMapper.toDTO(paymentRepository.save(payment));
     }
 
