@@ -5,7 +5,10 @@ import com.ridesharingappbackend.enums.RideStatus;
 import com.ridesharingappbackend.mappers.RideMapper;
 import com.ridesharingappbackend.models.Company;
 import com.ridesharingappbackend.models.Ride;
+import com.ridesharingappbackend.models.User;
+import com.ridesharingappbackend.repository.CompanyRepository;
 import com.ridesharingappbackend.repository.RideRepository;
+import com.ridesharingappbackend.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -30,6 +33,13 @@ class RideServiceTest {
     private RideService rideService;
 
     private final Integer companyId = 5;
+
+    @Mock
+    private CompanyRepository companyRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
 
     @BeforeEach
     void setUp() {
@@ -137,20 +147,34 @@ class RideServiceTest {
 
     @Test
     void createRide_AssignsCompanyAndSaves_ReturnsDTO() {
+        Integer passengerId = 10;
+
         RideDTO dto = new RideDTO();
         dto.setId(1);
         Ride ride = new Ride();
         ride.setId(1);
 
+        Company company = new Company();
+        company.setId(companyId);
+
+        User passenger = new User();
+        passenger.setId(passengerId);
+
         when(rideMapper.toEntity(dto)).thenReturn(ride);
-        when(rideRepository.save(ride)).thenReturn(ride);
+        when(companyRepository.findById(companyId)).thenReturn(Optional.of(company));
+        when(userRepository.findById(passengerId)).thenReturn(Optional.of(passenger));
+        when(rideRepository.save(any(Ride.class))).thenReturn(ride);
         when(rideMapper.toDTO(ride)).thenReturn(dto);
 
-        RideDTO result = rideService.createRide(dto, companyId);
+        RideDTO result = rideService.createRide(dto, companyId, passengerId);
 
         assertEquals(1, result.getId());
-        assertEquals(companyId, dto.getCompanyId());
+        verify(rideRepository).save(ride);
+        assertEquals(company, ride.getCompany());
+        assertEquals(passenger, ride.getPassenger());
     }
+
+
 
     @Test
     void deleteRide_WhenCompanyMatches_DeletesAndReturnsTrue() {

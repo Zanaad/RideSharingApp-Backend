@@ -6,6 +6,7 @@ import com.ridesharingappbackend.service.RideService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -65,9 +66,16 @@ public class RideController {
     }
 
     @PostMapping
-    public RideDTO createRide(@RequestBody RideDTO rideDTO, HttpServletRequest request) {
+    public ResponseEntity<RideDTO> bookRide(@RequestBody RideDTO rideDTO, HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
-        return rideService.createRide(rideDTO, companyId);
+        Integer passengerId = (Integer) request.getAttribute("userId");
+
+        if (companyId == null || passengerId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        RideDTO createdRide = rideService.createRide(rideDTO, companyId, passengerId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdRide);
     }
 
     @DeleteMapping("/{id}")

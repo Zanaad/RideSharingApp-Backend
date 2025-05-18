@@ -18,6 +18,7 @@ public class RideDTO {
     private Integer driverId;
     private String pickupLocation;
     private String dropOffLocation;
+
     private double distance;
     private double estimatedFare;
     private RideStatus status;

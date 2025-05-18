@@ -43,6 +43,8 @@ public class Ride {
     @Column(name = "pickup_location")
     private String pickupLocation;
 
+
+
     @Enumerated(EnumType.STRING)
     private RideStatus status;
 
