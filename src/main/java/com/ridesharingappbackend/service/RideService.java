@@ -3,8 +3,12 @@ package com.ridesharingappbackend.service;
 import com.ridesharingappbackend.dto.RideDTO;
 import com.ridesharingappbackend.enums.RideStatus;
 import com.ridesharingappbackend.mappers.RideMapper;
+import com.ridesharingappbackend.models.Company;
 import com.ridesharingappbackend.models.Ride;
+import com.ridesharingappbackend.models.User;
+import com.ridesharingappbackend.repository.CompanyRepository;
 import com.ridesharingappbackend.repository.RideRepository;
+import com.ridesharingappbackend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,11 +18,20 @@ import java.util.stream.Collectors;
 public class RideService {
     private final RideRepository rideRepository;
     private final RideMapper rideMapper;
+    private final CompanyRepository companyRepository;
+    private final UserRepository userRepository;
 
-    public RideService(RideRepository rideRepository, RideMapper rideMapper) {
+
+    public RideService(RideRepository rideRepository,
+                       CompanyRepository companyRepository,
+                       UserRepository userRepository,
+                       RideMapper rideMapper) {
         this.rideRepository = rideRepository;
+        this.companyRepository = companyRepository;
+        this.userRepository = userRepository;
         this.rideMapper = rideMapper;
     }
+
 
     public List<RideDTO> getRidesByCompany(Integer companyId) {
         return rideRepository.findByCompanyId(companyId).stream()
@@ -56,10 +69,23 @@ public class RideService {
                 .collect(Collectors.toList());
     }
 
-    public RideDTO createRide(RideDTO rideDTO, Integer companyId) {
-        rideDTO.setCompanyId(companyId);
+    public RideDTO createRide(RideDTO rideDTO, Integer companyId, Integer passengerId) {
         Ride ride = rideMapper.toEntity(rideDTO);
-        return rideMapper.toDTO(rideRepository.save(ride));
+
+        // Fetch Company entity
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new RuntimeException("Company not found"));
+
+        // Fetch User (passenger) entity
+        User passenger = userRepository.findById(passengerId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Set associations
+        ride.setCompany(company);
+        ride.setPassenger(passenger);
+
+        Ride savedRide = rideRepository.save(ride);
+        return rideMapper.toDTO(savedRide);
     }
 
     public boolean deleteRide(Integer id, Integer companyId) {

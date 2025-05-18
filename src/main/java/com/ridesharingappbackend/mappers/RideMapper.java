@@ -18,6 +18,7 @@ public interface RideMapper {
     @Mapping(target = "passenger", source = "passengerId", qualifiedByName = "mapPassenger")
     @Mapping(target = "driver", source = "driverId", qualifiedByName = "mapDriver")
     @Mapping(target = "company", source = "companyId", qualifiedByName = "mapCompany")
+
     Ride toEntity(RideDTO dto);
 
     @Named("mapPassenger")
