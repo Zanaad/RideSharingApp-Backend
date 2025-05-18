@@ -4,12 +4,11 @@ import com.ridesharingappbackend.dto.RideDTO;
 import com.ridesharingappbackend.enums.RideStatus;
 import com.ridesharingappbackend.service.RideService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/rides")
@@ -33,6 +32,13 @@ public class RideController {
         return rideService.getRideById(id, companyId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/my-rides")
+    public List<RideDTO> getMyRides(HttpServletRequest request) {
+        Integer passengerId = (Integer) request.getAttribute("userId");
+        Integer companyId = (Integer) request.getAttribute("companyId");
+        return rideService.getRidesByPassengerId(passengerId, companyId);
     }
 
     @GetMapping("/passenger/{passengerId}")
