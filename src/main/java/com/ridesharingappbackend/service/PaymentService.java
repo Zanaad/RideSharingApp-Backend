@@ -56,21 +56,28 @@ public class PaymentService {
     }
 
     public PaymentDTO createPayment(PaymentDTO dto, Integer companyId) {
+        Payment existing = paymentRepository.findByCompanyIdAndRideId(companyId, dto.getRideId());
+        if (existing != null) {
+            return paymentMapper.toDTO(existing);
+        }
+
         Payment payment = paymentMapper.toEntity(dto);
 
-        // Set company
         Company company = new Company();
         company.setId(companyId);
         payment.setCompany(company);
 
-        // Set ride
-        Ride ride = rideRepo.findById(dto.getRideId()).orElseThrow(() -> new ResourceNotFoundException("Ride not found"));
+        Ride ride = rideRepo.findById(dto.getRideId())
+                .orElseThrow(() -> new ResourceNotFoundException("Ride not found"));
         payment.setRide(ride);
-
-        // Set user (from ride's passenger)
         payment.setUser(ride.getPassenger());
 
         return paymentMapper.toDTO(paymentRepository.save(payment));
+    }
+
+    public List<PaymentDTO> getPaymentsByCompanyUserAndStatus(Integer companyId, Integer userId, PaymentStatus status) {
+        return paymentRepository.findByCompanyIdAndUserIdAndPaymentStatus(companyId, userId, status)
+                .stream().map(paymentMapper::toDTO).collect(Collectors.toList());
     }
 
     public boolean deletePaymentByIdAndCompanyId(Integer id, Integer companyId) {

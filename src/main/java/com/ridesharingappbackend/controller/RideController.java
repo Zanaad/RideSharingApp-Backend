@@ -41,12 +41,6 @@ public class RideController {
         return rideService.getRidesByPassengerId(passengerId, companyId);
     }
 
-    @GetMapping("/passenger/{passengerId}")
-    public List<RideDTO> getRidesByPassengerId(@PathVariable Integer passengerId, HttpServletRequest request) {
-        Integer companyId = (Integer) request.getAttribute("companyId");
-        return rideService.getRidesByCompanyAndPassenger(companyId, passengerId);
-    }
-
     @GetMapping("/company")
     public List<RideDTO> getRidesByCompany(HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
@@ -63,12 +57,6 @@ public class RideController {
     public List<RideDTO> getRidesByCompanyAndDriver(@PathVariable Integer driverId, HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
         return rideService.getRidesByCompanyAndDriver(companyId, driverId);
-    }
-
-    @GetMapping("/company/passenger/{passengerId}")
-    public List<RideDTO> getRidesByCompanyAndPassenger(@PathVariable Integer passengerId, HttpServletRequest request) {
-        Integer companyId = (Integer) request.getAttribute("companyId");
-        return rideService.getRidesByCompanyAndPassenger(companyId, passengerId);
     }
 
     @PostMapping
@@ -90,4 +78,14 @@ public class RideController {
         boolean deleted = rideService.deleteRide(id, companyId);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
+
+    @PutMapping("/cancel")
+    public ResponseEntity<Void> cancelRide(@PathVariable Integer id, HttpServletRequest request) {
+        Integer companyId = (Integer) request.getAttribute("companyId");
+        Integer userId = (Integer) request.getAttribute("userId");
+
+        boolean cancelled = rideService.cancelRide(id, companyId, userId);
+        return cancelled ? ResponseEntity.ok().build() : ResponseEntity.badRequest().build();
+    }
+
 }

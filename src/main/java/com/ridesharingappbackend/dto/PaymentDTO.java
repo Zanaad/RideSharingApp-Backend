@@ -20,7 +20,7 @@ public class PaymentDTO {
     private double amount;
     private PaymentMethod paymentMethod;
     private PaymentStatus paymentStatus;
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
     private Integer companyId;
 }
 
