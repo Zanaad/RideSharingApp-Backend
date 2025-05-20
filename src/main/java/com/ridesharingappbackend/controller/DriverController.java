@@ -20,7 +20,6 @@ public class DriverController {
     }
 
 
-    /*
     @GetMapping
     public List<DriverDTO> getAllDrivers(HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
@@ -62,6 +61,6 @@ public class DriverController {
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
-    }*/
+    }
 
 }

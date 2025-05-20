@@ -25,27 +25,7 @@ public class DriverDashboardDTO {
     private float rating;
     private DriverStatus status;
 
-    /*private String license_number;*/
 
 
- /*public DriverDashboardDTO(Integer driverId, String fullName, float rating, DriverStatus status) {
-  this.driverId = driverId;
-  this.fullName = fullName;
-  this.rating = rating;
-  this.status = status;
 
-*//*  this.license_number = license_number;*//*
-
- }
-    public Integer getDriverId() { return driverId; }
-    public void setDriverId(Integer driverId) { this.driverId = driverId; }
-
-    public String getFullName() { return fullName; }
-    public void setFullName(String fullName) { this.fullName = fullName; }
-
-    public float getRating() { return rating; }
-    public void setRating(float rating) { this.rating = rating; }
-
-    public DriverStatus getStatus() { return status; }
-    public void setStatus(DriverStatus status) { this.status = status; }*/
 }
