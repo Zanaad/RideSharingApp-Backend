@@ -52,6 +52,13 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         // Extract role and HTTP method, then check access control
         Integer roleId = claims.get("roleId", Integer.class);
         String method = request.getMethod();
+
+        // Always allow SuperAdmin (roleId == 4)
+        if (roleId != null && roleId == 4) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         System.out.println(path);
         PermissionCheckRequest permissionRequest = new PermissionCheckRequest();
         permissionRequest.setRoleId(roleId);

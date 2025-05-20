@@ -22,7 +22,7 @@ public class UserService {
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
     }
-    @Cacheable(value = "users", key = "#companyId")
+    @Cacheable(value = "users", key = "#companyId" ,condition = "#companyId != null")
     public List<UserDTO> getAllUsersByCompany(Integer companyId) {
         System.out.println("Fetching from DB for ID: " + companyId);
         return userRepository.findByCompanyId(companyId).stream()

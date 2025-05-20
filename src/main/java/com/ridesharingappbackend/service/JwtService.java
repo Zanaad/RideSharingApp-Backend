@@ -28,7 +28,7 @@ public class JwtService {
                 .setSubject(user.getEmail())
                 .claim("userId", user.getId())
                 .claim("roleId", user.getRole().getId())
-                .claim("companyId", user.getCompany().getId())
+                .claim("companyId",  user.getCompany() != null ? user.getCompany().getId() : null)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 day
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
