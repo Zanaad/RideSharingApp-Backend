@@ -55,6 +55,7 @@ public class GlobalExceptionHandler {
         if (ex instanceof InvalidCredentialsException) return HttpStatus.UNAUTHORIZED;
         if (ex instanceof DuplicateUserException) return HttpStatus.CONFLICT;
         if (ex instanceof ResourceNotFoundException) return HttpStatus.NOT_FOUND;
+        if (ex instanceof BadRequestException) return HttpStatus.BAD_REQUEST;
         return HttpStatus.BAD_REQUEST;
     }
 }
