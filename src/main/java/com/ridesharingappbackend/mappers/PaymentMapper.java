@@ -1,8 +1,13 @@
 package com.ridesharingappbackend.mappers;
 
 import com.ridesharingappbackend.dto.PaymentDTO;
-import com.ridesharingappbackend.models.*;
-import org.mapstruct.*;
+import com.ridesharingappbackend.models.Company;
+import com.ridesharingappbackend.models.Payment;
+import com.ridesharingappbackend.models.Ride;
+import com.ridesharingappbackend.models.User;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
 @Mapper(componentModel = "spring")
 public interface PaymentMapper {
@@ -15,6 +20,7 @@ public interface PaymentMapper {
     @Mapping(target = "ride", source = "rideId", qualifiedByName = "mapRide")
     @Mapping(target = "user", source = "userId", qualifiedByName = "mapUser")
     @Mapping(target = "company", source = "companyId", qualifiedByName = "mapCompany")
+    @Mapping(source = "createdAt", target = "createdAt")
     Payment toEntity(PaymentDTO dto);
 
     @Named("mapRide")

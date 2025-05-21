@@ -17,25 +17,29 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Ride {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "completed_at")
-    private LocalDateTime completedAt;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private RideStatus status;
 
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "pickup_lat", nullable = false)
+    private double pickupLat;
+
+    @Column(name = "pickup_lng", nullable = false)
+    private double pickupLng;
+
+    @Column(name = "dropoff_lat", nullable = false)
+    private double dropOffLat;
+
+    @Column(name = "dropoff_lng", nullable = false)
+    private double dropOffLng;
 
     @Column(nullable = false)
     private double distance;
-
-    @Column(name = "drop_off_location")
-    private String dropOffLocation;
-
-    @Column(name = "estimated_fare", nullable = false)
-    private double estimatedFare;
 
     @Column(nullable = false)
     private double fare;
@@ -43,10 +47,12 @@ public class Ride {
     @Column(name = "pickup_location")
     private String pickupLocation;
 
+    @Column(name = "drop_off_location")
+    private String dropOffLocation;
 
-
-    @Enumerated(EnumType.STRING)
-    private RideStatus status;
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "driver_id")
@@ -56,21 +62,7 @@ public class Ride {
     @JoinColumn(name = "passenger_id", nullable = false)
     private User passenger;
 
-    @Column(name = "pickup_time")
-    private LocalDateTime pickupTime;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
-
-    public Integer getId() { return id; }
-    public void setId(Integer id) {
-        this.id = id;
-    }
-    public RideStatus getStatus() { return status; }
-    public String getPickupLocation() { return pickupLocation; }
-    public String getDropOffLocation() { return dropOffLocation; }
-    public LocalDateTime getPickupTime() { return pickupTime; }
-
-
 }
