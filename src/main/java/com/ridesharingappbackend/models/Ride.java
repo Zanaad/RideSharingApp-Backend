@@ -66,3 +66,4 @@ public class Ride {
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
+}

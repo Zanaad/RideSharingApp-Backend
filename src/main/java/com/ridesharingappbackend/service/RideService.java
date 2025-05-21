@@ -28,19 +28,18 @@ public class RideService {
     private final RideMapper rideMapper;
     private final CompanyRepository companyRepository;
     private final UserRepository userRepository;
-    private final DriverRepository driverRepository;
+
     private final PaymentService paymentService;
 
-
+    public RideService(RideRepository rideRepository, DriverRepository driverRepository, RideMapper rideMapper, CompanyRepository companyRepository, UserRepository userRepository, PaymentService paymentService) {
         this.rideRepository = rideRepository;
         this.driverRepository = driverRepository;
+        this.rideMapper = rideMapper;
         this.companyRepository = companyRepository;
         this.userRepository = userRepository;
-        this.rideMapper = rideMapper;
-        this.driverRepository = driverRepository;
+
         this.paymentService = paymentService;
     }
-
 
     public List<RideDTO> getRidesByCompany(Integer companyId) {
         return rideRepository.findByCompanyId(companyId).stream().map(rideMapper::toDTO).collect(Collectors.toList());
@@ -99,5 +98,28 @@ public class RideService {
         }).orElse(false);
     }
 
+    public List<RideDTO> getRidesByDriver(Integer userId) {
+        Optional<Driver> driverOpt = driverRepository.findByUserId(userId);
+
+        if (driverOpt.isEmpty()) {
+            return new ArrayList<>(); // ose hidh një exception nëse duhet
+        }
+
+        Integer driverId = driverOpt.get().getId();
+        List<Ride> rides = rideRepository.findByDriver_Id(driverId);
+        return rides.stream().map(rideMapper::toDTO).collect(Collectors.toList());
+    }
+    public boolean updateRideStatus(Integer rideId, Integer userId, RideStatus newStatus) {
+        return driverRepository.findByUserId(userId)
+                .flatMap(driver -> rideRepository.findByIdAndDriver_Id(rideId, driver.getId()))
+                .map(ride -> {
+                    ride.setStatus(newStatus);
+                    rideRepository.save(ride);
+                    return true;
+                })
+                .orElse(false);
+    }
+
 }
+
 

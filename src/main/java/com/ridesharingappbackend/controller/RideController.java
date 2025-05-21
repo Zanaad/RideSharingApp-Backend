@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/driver/rides")
+@RequestMapping("/api/rides")
 public class RideController {
 
     private final RideService rideService;
@@ -79,6 +79,39 @@ public class RideController {
         Integer companyId = (Integer) request.getAttribute("companyId");
         boolean deleted = rideService.deleteRide(id, companyId);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+    @GetMapping("/my")
+    public ResponseEntity<List<RideDTO>> getMyRideHistory(HttpServletRequest request) {
+        Integer driverId = (int) request.getAttribute("userId");
+        System.out.println("DriverId from request: " + driverId);  // Kontroll
+
+        if (driverId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        List<RideDTO> rides = rideService.getRidesByDriver(driverId);
+        return ResponseEntity.ok(rides);
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<String> updateRideStatus(
+            @PathVariable Integer id,
+            @RequestBody RideDTO statusUpdateDTO,
+            HttpServletRequest request) {
+
+        Integer userId = (int) request.getAttribute("userId");
+
+        if (statusUpdateDTO.getStatus() == null) {
+            return ResponseEntity.badRequest().body("Invalid status");
+        }
+
+        boolean updated = rideService.updateRideStatus(id, userId, statusUpdateDTO.getStatus());
+
+        if (updated) {
+            return ResponseEntity.ok("Ride status updated successfully");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Could not update ride status");
+        }
     }
 
 }
