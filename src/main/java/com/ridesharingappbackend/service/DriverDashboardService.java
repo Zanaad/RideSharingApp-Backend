@@ -36,7 +36,7 @@ public class DriverDashboardService {
     @Autowired
     private VehicleRepository vehicleRepository;
 
-    public DriverDashboardDTO getDashboardByUserId(Long userId) {
+    public DriverDashboardDTO getDashboardByUserId(Integer userId) {
         // Merr drejtuesin përmes userId
         Driver driver = driverRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Driver not found"));

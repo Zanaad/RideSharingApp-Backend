@@ -10,10 +10,14 @@ import java.util.List;
 import java.util.Optional;
 
 public interface RideRepository extends JpaRepository<Ride, Integer> {
+
+
+    Optional<Ride> findTopByDriver_IdAndStatusInOrderByIdDesc(Integer driverId, List<RideStatus> statuses);
+    Optional<Ride> findByIdAndDriver_Id(Integer rideId, Integer driverId);
     List<Ride> findByPassengerId(Integer passengerId);
 
-    List<Ride> findByDriverId(Integer driverId);
 
+List<Ride> findByDriver_Id(int driverId);
     List<Ride> findByStatus(RideStatus status);
 
     List<Ride> findByCompanyId(Integer companyId);
