@@ -9,7 +9,6 @@ import com.ridesharingappbackend.models.Payment;
 import com.ridesharingappbackend.models.Ride;
 import com.ridesharingappbackend.repository.PaymentRepository;
 import com.ridesharingappbackend.repository.RideRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,13 +19,12 @@ import java.util.stream.Collectors;
 public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final PaymentMapper paymentMapper;
+    private final RideRepository rideRepo;
 
-    @Autowired
-    private RideRepository rideRepo;
-
-    public PaymentService(PaymentRepository paymentRepository, PaymentMapper paymentMapper) {
+    public PaymentService(PaymentRepository paymentRepository, PaymentMapper paymentMapper, RideRepository rideRepo) {
         this.paymentRepository = paymentRepository;
         this.paymentMapper = paymentMapper;
+        this.rideRepo = rideRepo;
     }
 
     public List<PaymentDTO> getAllPayments(Integer companyId) {
