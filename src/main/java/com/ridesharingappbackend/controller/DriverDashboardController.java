@@ -2,6 +2,7 @@ package com.ridesharingappbackend.controller;
 
 import com.ridesharingappbackend.dto.DriverDashboardDTO;
 import com.ridesharingappbackend.service.DriverDashboardService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,10 +19,15 @@ public class DriverDashboardController {
 
     @GetMapping
     public ResponseEntity<DriverDashboardDTO> getDashboard(@RequestParam Long userId) {
-        DriverDashboardDTO dto = dashboardService.getDashboardByUserId(userId);
-        if (dto == null) {
-            return ResponseEntity.notFound().build();
+        try {
+
+            DriverDashboardDTO dto = dashboardService.getDashboardByUserId(userId);
+            if (dto == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(dto);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        return ResponseEntity.ok(dto);
-    }
+}
 }

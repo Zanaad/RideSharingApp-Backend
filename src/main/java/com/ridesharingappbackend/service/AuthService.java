@@ -74,14 +74,28 @@ public class AuthService {
     }
 
     public AuthResponse login(AuthRequest request, Integer companyId) {
-        User user = userRepo.findByEmailAndCompanyId(request.getEmail(), companyId).orElseThrow(() -> new InvalidCredentialsException("Invalid credentials"));
+        User user;
+
+        if (companyId == null) {
+            // Handle SuperAdmin login
+            user = userRepo.findByEmail(request.getEmail())
+                    .orElseThrow(() -> new InvalidCredentialsException("Invalid credentials"));
+
+            if (user.getRole().getId() != 4) {
+                throw new InvalidCredentialsException("Invalid credentials");
+            }
+        } else {
+            // Normal user login
+            user = userRepo.findByEmailAndCompanyId(request.getEmail(), companyId)
+                    .orElseThrow(() -> new InvalidCredentialsException("Invalid credentials"));
+        }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new InvalidCredentialsException("Invalid credentials");
         }
-
         String token = jwtService.generateToken(user);
-        return new AuthResponse(token, user.getRole().getName(), user.getCompany().getId());
+        return new AuthResponse(token, user.getRole().getName(), user.getCompany() != null ? user.getCompany().getId() : null);
+
     }
 
     public void initiatePasswordReset(String email, String companyDomain) {
