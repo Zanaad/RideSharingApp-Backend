@@ -4,13 +4,12 @@ import com.ridesharingappbackend.dto.RideDTO;
 import com.ridesharingappbackend.enums.RideStatus;
 import com.ridesharingappbackend.service.RideService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/rides")
@@ -36,10 +35,11 @@ public class RideController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/passenger/{passengerId}")
-    public List<RideDTO> getRidesByPassengerId(@PathVariable Integer passengerId, HttpServletRequest request) {
+    @GetMapping("/my-rides")
+    public List<RideDTO> getMyRides(HttpServletRequest request) {
+        Integer passengerId = (Integer) request.getAttribute("userId");
         Integer companyId = (Integer) request.getAttribute("companyId");
-        return rideService.getRidesByCompanyAndPassenger(companyId, passengerId);
+        return rideService.getRidesByPassengerId(passengerId, companyId);
     }
 
     @GetMapping("/company")
@@ -61,12 +61,6 @@ public class RideController {
     }
 
 
-    @GetMapping("/company/passenger/{passengerId}")
-    public List<RideDTO> getRidesByCompanyAndPassenger(@PathVariable Integer passengerId, HttpServletRequest request) {
-        Integer companyId = (Integer) request.getAttribute("companyId");
-        return rideService.getRidesByCompanyAndPassenger(companyId, passengerId);
-    }
-
     @PostMapping
     public ResponseEntity<RideDTO> bookRide(@RequestBody RideDTO rideDTO, HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
@@ -87,41 +81,4 @@ public class RideController {
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 
-   @GetMapping("/my")
-   public ResponseEntity<List<RideDTO>> getMyRideHistory(HttpServletRequest request) {
-       Integer driverId = (int) request.getAttribute("userId");
-       System.out.println("DriverId from request: " + driverId);  // Kontroll
-
-       if (driverId == null) {
-           return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-       }
-
-       List<RideDTO> rides = rideService.getRidesByDriver(driverId);
-       return ResponseEntity.ok(rides);
-   }
-
-    @PutMapping("/{id}/status")
-    public ResponseEntity<String> updateRideStatus(
-            @PathVariable Integer id,
-            @RequestBody RideDTO statusUpdateDTO,
-            HttpServletRequest request) {
-
-        Integer userId = (int) request.getAttribute("userId");
-
-        if (statusUpdateDTO.getStatus() == null) {
-            return ResponseEntity.badRequest().body("Invalid status");
-        }
-
-        boolean updated = rideService.updateRideStatus(id, userId, statusUpdateDTO.getStatus());
-
-        if (updated) {
-            return ResponseEntity.ok("Ride status updated successfully");
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Could not update ride status");
-        }
-    }
-
-
-
-   
 }

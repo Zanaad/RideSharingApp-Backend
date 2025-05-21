@@ -13,20 +13,23 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RideDTO {
-    private int id;
+    private Integer id;
     private Integer passengerId;
     private Integer driverId;
+
+    private double pickupLat;
+    private double pickupLng;
+
+    private double dropOffLat;
+    private double dropOffLng;
+
     private String pickupLocation;
     private String dropOffLocation;
+    private LocalDateTime createdAt;
 
     private double distance;
-    private double estimatedFare;
-    private RideStatus status;
-    private LocalDateTime createdAt;
-    private LocalDateTime completedAt;
     private double fare;
-    private LocalDateTime pickupTime;
+    private RideStatus status;
     private Integer companyId;
-
 
 }

@@ -7,20 +7,14 @@ import com.ridesharingappbackend.enums.RideStatus;
 import com.ridesharingappbackend.enums.VehicleType;
 import com.ridesharingappbackend.exceptions.ResourceNotFoundException;
 import com.ridesharingappbackend.models.Driver;
-import com.ridesharingappbackend.models.DriverLicense;
 import com.ridesharingappbackend.models.Ride;
 import com.ridesharingappbackend.models.Vehicle;
-import com.ridesharingappbackend.repository.DriverLicenseRepository;
 import com.ridesharingappbackend.repository.DriverRepository;
 import com.ridesharingappbackend.repository.RideRepository;
 import com.ridesharingappbackend.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
- import lombok.Builder;
- import lombok.Data;
-import java.util.Comparator;
-import java.util.List;
 
 
 @Service
@@ -68,7 +62,7 @@ public class DriverDashboardService {
                 fullName,
                 driver.getRating(),
                 driver.getStatus()
-             /*   driver.getLicenseNumber()*/
+                /*   driver.getLicenseNumber()*/
         );
 
     }
@@ -80,7 +74,7 @@ public class DriverDashboardService {
         dto.setStatus(RideStatus.COMPLETED);
         dto.setPickupLocation(ride.getPickupLocation());
         dto.setDropOffLocation(ride.getDropOffLocation());
-        dto.setPickupTime(ride.getPickupTime());
+//        dto.setPickupTime(ride.getPickupTime());
         return dto;
     }
 

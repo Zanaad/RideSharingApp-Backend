@@ -1,12 +1,15 @@
 package com.ridesharingappbackend.service;
 
 import com.ridesharingappbackend.dto.RideDTO;
+import com.ridesharingappbackend.enums.DriverStatus;
 import com.ridesharingappbackend.enums.RideStatus;
 import com.ridesharingappbackend.mappers.RideMapper;
 import com.ridesharingappbackend.models.Company;
+import com.ridesharingappbackend.models.Driver;
 import com.ridesharingappbackend.models.Ride;
 import com.ridesharingappbackend.models.User;
 import com.ridesharingappbackend.repository.CompanyRepository;
+import com.ridesharingappbackend.repository.DriverRepository;
 import com.ridesharingappbackend.repository.RideRepository;
 import com.ridesharingappbackend.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,6 +43,8 @@ class RideServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private DriverRepository driverRepository;
 
     @BeforeEach
     void setUp() {
@@ -160,18 +165,26 @@ class RideServiceTest {
         User passenger = new User();
         passenger.setId(passengerId);
 
+        Driver driver = new Driver();
+        driver.setId(42);
+        driver.setStatus(DriverStatus.AVAILABLE);
+
         when(rideMapper.toEntity(dto)).thenReturn(ride);
         when(companyRepository.findById(companyId)).thenReturn(Optional.of(company));
         when(userRepository.findById(passengerId)).thenReturn(Optional.of(passenger));
+        when(driverRepository.findByCompanyIdAndStatus(companyId, DriverStatus.AVAILABLE)).thenReturn(List.of(driver));
         when(rideRepository.save(any(Ride.class))).thenReturn(ride);
         when(rideMapper.toDTO(ride)).thenReturn(dto);
 
         RideDTO result = rideService.createRide(dto, companyId, passengerId);
 
         assertEquals(1, result.getId());
+        verify(driverRepository).save(driver); // driver status should be saved
         verify(rideRepository).save(ride);
         assertEquals(company, ride.getCompany());
         assertEquals(passenger, ride.getPassenger());
+        assertEquals(driver, ride.getDriver());
+        assertEquals(RideStatus.ACCEPTED, ride.getStatus());
     }
 
 

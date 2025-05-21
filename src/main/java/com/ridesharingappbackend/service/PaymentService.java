@@ -2,10 +2,13 @@ package com.ridesharingappbackend.service;
 
 import com.ridesharingappbackend.dto.PaymentDTO;
 import com.ridesharingappbackend.enums.PaymentStatus;
+import com.ridesharingappbackend.exceptions.ResourceNotFoundException;
 import com.ridesharingappbackend.mappers.PaymentMapper;
 import com.ridesharingappbackend.models.Company;
 import com.ridesharingappbackend.models.Payment;
+import com.ridesharingappbackend.models.Ride;
 import com.ridesharingappbackend.repository.PaymentRepository;
+import com.ridesharingappbackend.repository.RideRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,10 +19,12 @@ import java.util.stream.Collectors;
 public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final PaymentMapper paymentMapper;
+    private final RideRepository rideRepo;
 
-    public PaymentService(PaymentRepository paymentRepository, PaymentMapper paymentMapper) {
+    public PaymentService(PaymentRepository paymentRepository, PaymentMapper paymentMapper, RideRepository rideRepo) {
         this.paymentRepository = paymentRepository;
         this.paymentMapper = paymentMapper;
+        this.rideRepo = rideRepo;
     }
 
     public List<PaymentDTO> getAllPayments(Integer companyId) {
@@ -49,11 +54,28 @@ public class PaymentService {
     }
 
     public PaymentDTO createPayment(PaymentDTO dto, Integer companyId) {
+        Payment existing = paymentRepository.findByCompanyIdAndRideId(companyId, dto.getRideId());
+        if (existing != null) {
+            return paymentMapper.toDTO(existing);
+        }
+
         Payment payment = paymentMapper.toEntity(dto);
+
         Company company = new Company();
         company.setId(companyId);
         payment.setCompany(company);
+
+        Ride ride = rideRepo.findById(dto.getRideId())
+                .orElseThrow(() -> new ResourceNotFoundException("Ride not found"));
+        payment.setRide(ride);
+        payment.setUser(ride.getPassenger());
+
         return paymentMapper.toDTO(paymentRepository.save(payment));
+    }
+
+    public List<PaymentDTO> getPaymentsByCompanyUserAndStatus(Integer companyId, Integer userId, PaymentStatus status) {
+        return paymentRepository.findByCompanyIdAndUserIdAndPaymentStatus(companyId, userId, status)
+                .stream().map(paymentMapper::toDTO).collect(Collectors.toList());
     }
 
     public boolean deletePaymentByIdAndCompanyId(Integer id, Integer companyId) {
