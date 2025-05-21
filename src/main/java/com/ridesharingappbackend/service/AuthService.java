@@ -70,7 +70,7 @@ public class AuthService {
         User saved = userRepo.save(user);
         String token = jwtService.generateToken(saved);
 
-        return new AuthResponse(token, role.getName(), company.getId());
+        return new AuthResponse(token, role.getName(), company.getId(),saved.getId());
     }
 
     public AuthResponse login(AuthRequest request, Integer companyId) {
@@ -94,7 +94,7 @@ public class AuthService {
             throw new InvalidCredentialsException("Invalid credentials");
         }
         String token = jwtService.generateToken(user);
-        return new AuthResponse(token, user.getRole().getName(), user.getCompany() != null ? user.getCompany().getId() : null);
+        return new AuthResponse(token, user.getRole().getName(), user.getCompany() != null ? user.getCompany().getId() : null, user.getId());
 
     }
 
