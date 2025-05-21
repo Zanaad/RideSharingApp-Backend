@@ -15,6 +15,8 @@ import com.ridesharingappbackend.repository.RideRepository;
 import com.ridesharingappbackend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -22,21 +24,22 @@ import java.util.stream.Collectors;
 @Service
 public class RideService {
     private final RideRepository rideRepository;
+    private final DriverRepository driverRepository;
     private final RideMapper rideMapper;
     private final CompanyRepository companyRepository;
     private final UserRepository userRepository;
-    private final DriverRepository driverRepository;
+
     private final PaymentService paymentService;
 
-    public RideService(RideRepository rideRepository, CompanyRepository companyRepository, UserRepository userRepository, RideMapper rideMapper, DriverRepository driverRepository, PaymentService paymentService) {
+    public RideService(RideRepository rideRepository, DriverRepository driverRepository, RideMapper rideMapper, CompanyRepository companyRepository, UserRepository userRepository, PaymentService paymentService) {
         this.rideRepository = rideRepository;
+        this.driverRepository = driverRepository;
+        this.rideMapper = rideMapper;
         this.companyRepository = companyRepository;
         this.userRepository = userRepository;
-        this.rideMapper = rideMapper;
-        this.driverRepository = driverRepository;
+
         this.paymentService = paymentService;
     }
-
 
     public List<RideDTO> getRidesByCompany(Integer companyId) {
         return rideRepository.findByCompanyId(companyId).stream().map(rideMapper::toDTO).collect(Collectors.toList());
@@ -95,37 +98,28 @@ public class RideService {
         }).orElse(false);
     }
 
-    public boolean cancelRide(Integer rideId, Integer companyId, Integer userId) {
-        Optional<Ride> optionalRide = rideRepository.findById(rideId);
+    public List<RideDTO> getRidesByDriver(Integer userId) {
+        Optional<Driver> driverOpt = driverRepository.findByUserId(userId);
 
-        if (optionalRide.isEmpty()) {
-            return false;
+        if (driverOpt.isEmpty()) {
+            return new ArrayList<>(); // ose hidh një exception nëse duhet
         }
 
-        Ride ride = optionalRide.get();
-
-        // Ensure ride belongs to this company and passenger
-        if (!ride.getCompany().getId().equals(companyId) || !ride.getPassenger().getId().equals(userId)) {
-            return false;
-        }
-
-        // Only allow canceling REQUESTED or ACCEPTED rides
-        if (ride.getStatus() != RideStatus.REQUESTED && ride.getStatus() != RideStatus.ACCEPTED) {
-            return false;
-        }
-
-        // Set driver back to AVAILABLE
-        Driver driver = ride.getDriver();
-        if (driver != null && driver.getStatus() == DriverStatus.BUSY) {
-            driver.setStatus(DriverStatus.AVAILABLE);
-            driverRepository.save(driver);
-        }
-
-        // Mark the ride as CANCELLED
-        ride.setStatus(RideStatus.CANCELLED);
-        rideRepository.save(ride);
-        return true;
+        Integer driverId = driverOpt.get().getId();
+        List<Ride> rides = rideRepository.findByDriver_Id(driverId);
+        return rides.stream().map(rideMapper::toDTO).collect(Collectors.toList());
+    }
+    public boolean updateRideStatus(Integer rideId, Integer userId, RideStatus newStatus) {
+        return driverRepository.findByUserId(userId)
+                .flatMap(driver -> rideRepository.findByIdAndDriver_Id(rideId, driver.getId()))
+                .map(ride -> {
+                    ride.setStatus(newStatus);
+                    rideRepository.save(ride);
+                    return true;
+                })
+                .orElse(false);
     }
 
 }
+
 

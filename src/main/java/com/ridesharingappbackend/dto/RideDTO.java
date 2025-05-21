@@ -31,4 +31,5 @@ public class RideDTO {
     private double fare;
     private RideStatus status;
     private Integer companyId;
+
 }
