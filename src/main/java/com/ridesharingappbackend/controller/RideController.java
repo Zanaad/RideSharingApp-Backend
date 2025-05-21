@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/rides")
+@RequestMapping("/api/driver/rides")
 public class RideController {
 
     private final RideService rideService;
