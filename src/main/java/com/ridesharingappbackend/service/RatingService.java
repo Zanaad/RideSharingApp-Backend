@@ -10,6 +10,28 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Shërbimi që menaxhon logjikën e biznesit për entitetin {@link Rating}.
+ *
+ * Ky shërbim ofron operacione për:
+ * <ul>
+ *     <li>Marrjen e të gjitha vlerësimeve për një kompani të caktuar</li>
+ *     <li>Gjetjen e një vlerësimi sipas ID-së dhe ID-së së kompanisë</li>
+ *     <li>Marrjen e vlerësimeve për një shofer të caktuar dhe kompani</li>
+ *     <li>Gjetjen e një vlerësimi për një udhëtim specifik dhe kompani</li>
+ *     <li>Krijimin e një vlerësimi të ri</li>
+ *     <li>Fshirjen e një vlerësimi duke verifikuar pronësinë e kompanisë</li>
+ *     <li>Marrjen e të gjitha vlerësimeve për një shofer të caktuar</li>
+ * </ul>
+ *
+ * Ky shërbim përdor {@link RatingRepository} për të komunikuar me bazën e të dhënave
+ * dhe {@link RatingMapper} për të transformuar të dhënat midis {@link Rating} dhe {@link RatingDTO}.
+ *
+ * @author [Emri juaj]
+ * @since 2025-05-22
+ * @version 1.0
+ */
+
 @Service
 public class RatingService {
     private final RatingRepository ratingRepository;
