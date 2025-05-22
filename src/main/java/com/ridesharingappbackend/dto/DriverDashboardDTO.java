@@ -18,6 +18,30 @@ import lombok.Data;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * DTO (Data Transfer Object) që përfaqëson të dhënat e dashboard-it të një shoferi.
+ *
+ * Kjo klasë përdoret për të transferuar informacionin kryesor që shfaqet në dashboard-in
+ * e shoferit, si identifikuesi, emri i plotë, vlerësimi dhe statusi i tij aktual.
+ *
+ * Fushat e përfshira:
+ * <ul>
+ *   <li>{@code driverId} - ID unike e shoferit</li>
+ *   <li>{@code fullName} - Emri dhe mbiemri i shoferit</li>
+ *   <li>{@code rating} - Vlerësimi mesatar i shoferit nga pasagjerët</li>
+ *   <li>{@code status} - Statusi aktual i shoferit (AKTIV, JOAKTIV, NË UDHTIM, etj.)</li>
+ * </ul>
+ *
+ * Anotimet {@code @Getter}, {@code @Setter}, {@code @NoArgsConstructor} dhe {@code @AllArgsConstructor}
+ * janë të ofruara nga Lombok për të gjeneruar automatikisht metodat getter/setter dhe konstruktorët.
+ *
+ * Kjo klasë mund të përdoret në shtresat e shërbimit dhe kontrollerit për të strukturuar përgjigjet HTTP.
+ *
+ * @author [Emri juaj]
+ * @version 1.0
+ * @since 2025-05-22
+ */
+
 public class DriverDashboardDTO {
 
     private Integer driverId;
