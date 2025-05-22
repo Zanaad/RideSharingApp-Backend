@@ -37,9 +37,6 @@ import lombok.Data;
  *
  * Kjo klasë mund të përdoret në shtresat e shërbimit dhe kontrollerit për të strukturuar përgjigjet HTTP.
  *
- * @author [Emri juaj]
- * @version 1.0
- * @since 2025-05-22
  */
 
 public class DriverDashboardDTO {
