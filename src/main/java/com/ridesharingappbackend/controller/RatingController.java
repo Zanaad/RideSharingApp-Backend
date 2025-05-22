@@ -16,9 +16,11 @@ import java.util.List;
 public class RatingController {
 
     private final RatingService ratingService;
+    private final RideService rideService;
 
-    public RatingController(RatingService ratingService) {
+    public RatingController(RatingService ratingService, RideService rideService) {
         this.ratingService = ratingService;
+        this.rideService=rideService;
     }
 
     @GetMapping
@@ -79,23 +81,23 @@ public class RatingController {
         List<RatingDTO> ratings = ratingService.getRatingsForDriver(driverId);
         return ResponseEntity.ok(ratings);
     }
-    @PutMapping("/{id}/status")
-    public ResponseEntity<String> updateRideStatus(
-            @PathVariable Integer id,
-            @RequestBody RideDTO statusUpdateDTO,
-            HttpServletRequest request) {
-
-        Integer userId = (int) request.getAttribute("userId");
-
-        if (statusUpdateDTO.getStatus() == null) {
-            return ResponseEntity.badRequest().body("Invalid status");
-        }
-
-        boolean updated = rideService.updateRideStatus(id, userId, statusUpdateDTO.getStatus());
-
-        if (updated) {
-            return ResponseEntity.ok("Ride status updated successfully");
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Could not update ride status");
-        }
+//    @PutMapping("/{id}/status")
+//    public ResponseEntity<String> updateRideStatus(
+//            @PathVariable Integer id,
+//            @RequestBody RideDTO statusUpdateDTO,
+//            HttpServletRequest request) {
+//
+//        Integer userId = (int) request.getAttribute("userId");
+//
+//        if (statusUpdateDTO.getStatus() == null) {
+//            return ResponseEntity.badRequest().body("Invalid status");
+//        }
+//
+//        boolean updated = rideService.updateRideStatus(id, userId, statusUpdateDTO.getStatus());
+//
+//        if (updated) {
+//            return ResponseEntity.ok("Ride status updated successfully");
+//        } else {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Could not update ride status");
+//        }
 }
