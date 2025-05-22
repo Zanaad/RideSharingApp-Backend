@@ -18,10 +18,11 @@ import java.util.Optional;
 public class RideController {
 
     private final RideService rideService;
+    private final RatingService ratingService;
 
-    public RideController(RideService rideService) {
+    public RideController(RideService rideService, RatingService ratingService) {
         this.rideService = rideService;
-
+        this.ratingService=ratingService;
     }
 
     @GetMapping
