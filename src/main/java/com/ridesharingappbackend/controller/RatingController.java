@@ -1,7 +1,9 @@
 package com.ridesharingappbackend.controller;
 
 import com.ridesharingappbackend.dto.RatingDTO;
+import com.ridesharingappbackend.dto.RideDTO;
 import com.ridesharingappbackend.service.RatingService;
+import com.ridesharingappbackend.service.RideService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -77,24 +79,23 @@ public class RatingController {
         List<RatingDTO> ratings = ratingService.getRatingsForDriver(driverId);
         return ResponseEntity.ok(ratings);
     }
-    public boolean updateRideStatus(Integer rideId, Integer userId, RideStatus newStatus) {
-        return driverRepository.findByUserId(userId)
-                .flatMap(driver -> rideRepository.findByIdAndDriver_Id(rideId, driver.getId()))
-                .map(ride -> {
-                    ride.setStatus(newStatus);
-                    rideRepository.save(ride);
-                    return true;
-                })
-                .orElse(false);
+    @PutMapping("/{id}/status")
+    public ResponseEntity<String> updateRideStatus(
+            @PathVariable Integer id,
+            @RequestBody RideDTO statusUpdateDTO,
+            HttpServletRequest request) {
 
+        Integer userId = (int) request.getAttribute("userId");
 
+        if (statusUpdateDTO.getStatus() == null) {
+            return ResponseEntity.badRequest().body("Invalid status");
+        }
 
+        boolean updated = rideService.updateRideStatus(id, userId, statusUpdateDTO.getStatus());
 
-
-
-
-
-
-
-    }
+        if (updated) {
+            return ResponseEntity.ok("Ride status updated successfully");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Could not update ride status");
+        }
 }
