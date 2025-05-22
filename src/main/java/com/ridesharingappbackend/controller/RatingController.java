@@ -69,5 +69,17 @@ public class RatingController {
         }
         return ResponseEntity.notFound().build();
     }
+    @GetMapping("/my")
+    public ResponseEntity<List<RatingDTO>> getMyRatings(HttpServletRequest request) {
+        Integer driverId = (Integer) request.getAttribute("userId");
+        System.out.println("DriverId from request: " + driverId);
+
+        if (driverId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        List<RatingDTO> ratings = ratingService.getRatingsForDriver(driverId);
+        return ResponseEntity.ok(ratings);
+    }
 
 }
