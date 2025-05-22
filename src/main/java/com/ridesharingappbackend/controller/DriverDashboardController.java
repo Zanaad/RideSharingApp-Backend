@@ -26,9 +26,6 @@ import java.util.Optional;
  *
  * Përdor {@link DriverDashboardService} për të përpunuar logjikën e biznesit.
  *
- * @author [Hare Luma]
- * @version 1.0
- * @since 2025-05-22
  */
 @RestController
 @RequestMapping("/api/dashboard")
