@@ -116,6 +116,6 @@ public class RideController {
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Could not update ride status");
         }
-
+    }
 
 }
