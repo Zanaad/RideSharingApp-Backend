@@ -57,4 +57,9 @@ public class RatingService {
                 })
                 .orElse(false);
     }
+    public List<RatingDTO> getRatingsForDriver(Integer driverId) {
+        List<Rating> ratingList = ratingRepository.findByDriverId(driverId);
+        return ratingList.stream().map(ratingMapper::toDTO).toList();
+    }
+
 }

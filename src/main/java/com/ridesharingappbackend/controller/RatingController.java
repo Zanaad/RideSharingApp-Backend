@@ -1,8 +1,11 @@
 package com.ridesharingappbackend.controller;
 
 import com.ridesharingappbackend.dto.RatingDTO;
+import com.ridesharingappbackend.dto.RideDTO;
 import com.ridesharingappbackend.service.RatingService;
+import com.ridesharingappbackend.service.RideService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,9 +16,11 @@ import java.util.List;
 public class RatingController {
 
     private final RatingService ratingService;
+    private final RideService rideService;
 
-    public RatingController(RatingService ratingService) {
+    public RatingController(RatingService ratingService, RideService rideService) {
         this.ratingService = ratingService;
+        this.rideService=rideService;
     }
 
     @GetMapping
@@ -64,4 +69,17 @@ public class RatingController {
         }
         return ResponseEntity.notFound().build();
     }
+    @GetMapping("/my")
+    public ResponseEntity<List<RatingDTO>> getMyRatings(HttpServletRequest request) {
+        Integer driverId = (Integer) request.getAttribute("userId");
+        System.out.println("DriverId from request: " + driverId);
+
+        if (driverId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        List<RatingDTO> ratings = ratingService.getRatingsForDriver(driverId);
+        return ResponseEntity.ok(ratings);
+    }
+
 }
