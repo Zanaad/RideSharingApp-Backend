@@ -12,6 +12,26 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Kontrolleri REST për menaxhimin e pagesave në aplikacionin e shpërndarjes së udhëtimeve.
+ *
+ * Kjo klasë ofron endpoint-e për:
+ * <ul>
+ *     <li>Krijimin e një Stripe PaymentIntent</li>
+ *     <li>Marrjen e të gjitha pagesave për një kompani</li>
+ *     <li>Marrjen e pagesave për një përdorues specifik</li>
+ *     <li>Marrjen e një pagese sipas ID-së ose ID-së së udhëtimit</li>
+ *     <li>Filtrimin e pagesave sipas statusit</li>
+ *     <li>Krijimin, përditësimin dhe fshirjen e pagesave</li>
+ * </ul>
+ *
+ * Ky kontroller përdor {@link PaymentService} për logjikën e biznesit të pagesave
+ * dhe {@link StripeService} për integrim me Stripe API për krijimin e intent-eve të pagesave.
+ *
+ * ID e kompanisë dhe e përdoruesit merren nga atributet e kërkesës që vendosen nga një filtër autentikimi.
+ *
+ */
+
 @RestController
 @RequestMapping("/api/payments")
 public class PaymentController {
