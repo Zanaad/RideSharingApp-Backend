@@ -1,18 +1,14 @@
 package com.ridesharingappbackend.service;
 
+import com.ridesharingappbackend.dto.RatingDTO;
 import com.ridesharingappbackend.dto.RideDTO;
 import com.ridesharingappbackend.enums.DriverStatus;
 import com.ridesharingappbackend.enums.RideStatus;
 import com.ridesharingappbackend.exceptions.NoAvailableDriversException;
+import com.ridesharingappbackend.mappers.RatingMapper;
 import com.ridesharingappbackend.mappers.RideMapper;
-import com.ridesharingappbackend.models.Company;
-import com.ridesharingappbackend.models.Driver;
-import com.ridesharingappbackend.models.Ride;
-import com.ridesharingappbackend.models.User;
-import com.ridesharingappbackend.repository.CompanyRepository;
-import com.ridesharingappbackend.repository.DriverRepository;
-import com.ridesharingappbackend.repository.RideRepository;
-import com.ridesharingappbackend.repository.UserRepository;
+import com.ridesharingappbackend.models.*;
+import com.ridesharingappbackend.repository.*;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -28,10 +24,12 @@ public class RideService {
     private final RideMapper rideMapper;
     private final CompanyRepository companyRepository;
     private final UserRepository userRepository;
+    private final RatingRepository ratingRepository;
+    private final RatingMapper ratingMapper;
 
     private final PaymentService paymentService;
 
-    public RideService(RideRepository rideRepository, DriverRepository driverRepository, RideMapper rideMapper, CompanyRepository companyRepository, UserRepository userRepository, PaymentService paymentService) {
+    public RideService(RideRepository rideRepository, DriverRepository driverRepository, RideMapper rideMapper, CompanyRepository companyRepository, UserRepository userRepository, PaymentService paymentService, RatingRepository ratingRepository, RatingMapper ratingMapper) {
         this.rideRepository = rideRepository;
         this.driverRepository = driverRepository;
         this.rideMapper = rideMapper;
@@ -39,6 +37,8 @@ public class RideService {
         this.userRepository = userRepository;
 
         this.paymentService = paymentService;
+        this.ratingRepository=ratingRepository;
+        this.ratingMapper=ratingMapper;
     }
 
     public List<RideDTO> getRidesByCompany(Integer companyId) {
@@ -119,6 +119,7 @@ public class RideService {
                 })
                 .orElse(false);
     }
+
 
 }
 
