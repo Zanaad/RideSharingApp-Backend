@@ -28,9 +28,6 @@ import java.util.stream.Collectors;
  *
  * Të gjitha operacionet janë të kufizuara brenda kontekstit të një kompanie përmes kontrollit të {@code companyId}.
  *
- * @author [Emri juaj]
- * @version 1.0
- * @since 2025-05-22
  */
 
 @Service
