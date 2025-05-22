@@ -11,6 +11,30 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Kontrolleri REST për menaxhimin e vlerësimeve (ratings) në aplikacionin për ndarjen e udhëtimeve.
+ *
+ * Kjo klasë ofron pika fundore (endpoints) për të:
+ * <ul>
+ *     <li>Marrë të gjitha vlerësimet për një kompani specifike</li>
+ *     <li>Marrë një vlerësim të vetëm sipas ID-së dhe kompanisë</li>
+ *     <li>Marrë të gjitha vlerësimet për një shofer të caktuar</li>
+ *     <li>Marrë një vlerësim sipas ID-së së udhëtimit</li>
+ *     <li>Krijuar një vlerësim të ri</li>
+ *     <li>Fshirë një vlerësim ekzistues</li>
+ *     <li>Marrë të gjitha vlerësimet për shoferin e identifikuar (vetveten)</li>
+ * </ul>
+ *
+ * {@code companyId} dhe {@code userId} nxirren nga atributet e {@link HttpServletRequest}, duke garantuar
+ * se operacionet janë të kufizuara brenda kontekstit të kompanisë përkatëse dhe përdoruesit të identifikuar.
+ *
+ * Delegon logjikën e biznesit tek {@link RatingService} dhe përdor gjithashtu {@link RideService} për referencë.
+ *
+ * @author [Emri juaj]
+ * @since 2025-05-22
+ * @version 1.0
+ */
+
 @RestController
 @RequestMapping("/api/ratings")
 public class RatingController {
