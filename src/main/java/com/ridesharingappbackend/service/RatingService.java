@@ -27,9 +27,7 @@ import java.util.stream.Collectors;
  * Ky shërbim përdor {@link RatingRepository} për të komunikuar me bazën e të dhënave
  * dhe {@link RatingMapper} për të transformuar të dhënat midis {@link Rating} dhe {@link RatingDTO}.
  *
- * @author [Emri juaj]
- * @since 2025-05-22
- * @version 1.0
+
  */
 
 @Service
