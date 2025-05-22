@@ -30,9 +30,7 @@ import java.util.List;
  *
  * Delegon logjikën e biznesit tek {@link RatingService} dhe përdor gjithashtu {@link RideService} për referencë.
  *
- * @author [Emri juaj]
- * @since 2025-05-22
- * @version 1.0
+
  */
 
 @RestController
