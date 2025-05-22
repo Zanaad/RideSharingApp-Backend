@@ -1,7 +1,9 @@
 package com.ridesharingappbackend.controller;
 
+import com.ridesharingappbackend.dto.RatingDTO;
 import com.ridesharingappbackend.dto.RideDTO;
 import com.ridesharingappbackend.enums.RideStatus;
+import com.ridesharingappbackend.service.RatingService;
 import com.ridesharingappbackend.service.RideService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +18,11 @@ import java.util.Optional;
 public class RideController {
 
     private final RideService rideService;
+    private final RatingService ratingService;
 
-    public RideController(RideService rideService) {
+    public RideController(RideService rideService, RatingService ratingService) {
         this.rideService = rideService;
+        this.ratingService=ratingService;
     }
 
     @GetMapping
@@ -84,4 +88,7 @@ public class RideController {
         boolean deleted = rideService.deleteRide(id, companyId);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
+
+
+
 }

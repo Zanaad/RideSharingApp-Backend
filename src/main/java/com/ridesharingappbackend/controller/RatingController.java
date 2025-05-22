@@ -3,6 +3,7 @@ package com.ridesharingappbackend.controller;
 import com.ridesharingappbackend.dto.RatingDTO;
 import com.ridesharingappbackend.service.RatingService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -64,4 +65,17 @@ public class RatingController {
         }
         return ResponseEntity.notFound().build();
     }
+    @GetMapping("/my")
+    public ResponseEntity<List<RatingDTO>> getMyRatings(HttpServletRequest request) {
+        Integer driverId = (Integer) request.getAttribute("userId");
+        System.out.println("DriverId from request: " + driverId);
+
+        if (driverId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        List<RatingDTO> ratings = ratingService.getRatingsForDriver(driverId);
+        return ResponseEntity.ok(ratings);
+    }
+
 }
