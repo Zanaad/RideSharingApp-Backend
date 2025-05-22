@@ -15,6 +15,30 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Shërbimi që menaxhon logjikën e biznesit për entitetin {@link Payment}.
+ *
+ * Ky shërbim ofron funksionalitete për:
+ * <ul>
+ *     <li>Marrjen e të gjitha pagesave të lidhura me një kompani</li>
+ *     <li>Marrjen e një pagese sipas ID-së dhe ID-së së kompanisë</li>
+ *     <li>Marrjen e një pagese për një udhëtim specifik</li>
+ *     <li>Marrjen e pagesave të një përdoruesi brenda një kompanie</li>
+ *     <li>Filtrimin e pagesave sipas statusit të pagesës</li>
+ *     <li>Krijimin e një pagese të re për një udhëtim</li>
+ *     <li>Fshirjen e një pagese duke verifikuar që i përket kompanisë</li>
+ * </ul>
+ *
+ * Ky shërbim përdor {@link PaymentRepository} dhe {@link RideRepository} për të komunikuar me bazën e të dhënave,
+ * si dhe {@link PaymentMapper} për të konvertuar të dhënat ndërmjet {@link Payment} dhe {@link PaymentDTO}.
+ *
+ * Në rastin kur tashmë ekziston një pagesë për një udhëtim të caktuar, ajo do të rikthehet pa krijuar një të re.
+ *
+ * @author Hare Luma
+ * @since 2025-05-22
+ * @version 1.0
+ */
+
 @Service
 public class PaymentService {
     private final PaymentRepository paymentRepository;
