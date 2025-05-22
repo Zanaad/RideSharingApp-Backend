@@ -77,5 +77,24 @@ public class RatingController {
         List<RatingDTO> ratings = ratingService.getRatingsForDriver(driverId);
         return ResponseEntity.ok(ratings);
     }
+    public boolean updateRideStatus(Integer rideId, Integer userId, RideStatus newStatus) {
+        return driverRepository.findByUserId(userId)
+                .flatMap(driver -> rideRepository.findByIdAndDriver_Id(rideId, driver.getId()))
+                .map(ride -> {
+                    ride.setStatus(newStatus);
+                    rideRepository.save(ride);
+                    return true;
+                })
+                .orElse(false);
 
+
+
+
+
+
+
+
+
+
+    }
 }
