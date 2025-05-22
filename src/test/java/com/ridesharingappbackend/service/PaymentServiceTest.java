@@ -5,12 +5,18 @@ import com.ridesharingappbackend.enums.PaymentStatus;
 import com.ridesharingappbackend.mappers.PaymentMapper;
 import com.ridesharingappbackend.models.Company;
 import com.ridesharingappbackend.models.Payment;
+import com.ridesharingappbackend.models.Ride;
+import com.ridesharingappbackend.models.User;
 import com.ridesharingappbackend.repository.PaymentRepository;
+import com.ridesharingappbackend.repository.RideRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -25,6 +31,8 @@ class PaymentServiceTest {
 
     @InjectMocks
     private PaymentService paymentService;
+    @Mock
+    private RideRepository rideRepo;
 
     private final Integer companyId = 5;
 
@@ -35,8 +43,10 @@ class PaymentServiceTest {
 
     @Test
     void getAllPayments_ReturnsFilteredList() {
-        Payment payment = new Payment(); payment.setId(1);
-        PaymentDTO dto = new PaymentDTO(); dto.setId(1);
+        Payment payment = new Payment();
+        payment.setId(1);
+        PaymentDTO dto = new PaymentDTO();
+        dto.setId(1);
 
         when(paymentRepository.findByCompanyId(companyId)).thenReturn(List.of(payment));
         when(paymentMapper.toDTO(payment)).thenReturn(dto);
@@ -49,8 +59,10 @@ class PaymentServiceTest {
 
     @Test
     void getPaymentByIdAndCompanyId_WhenExists_ReturnsDTO() {
-        Payment payment = new Payment(); payment.setId(1);
-        PaymentDTO dto = new PaymentDTO(); dto.setId(1);
+        Payment payment = new Payment();
+        payment.setId(1);
+        PaymentDTO dto = new PaymentDTO();
+        dto.setId(1);
 
         when(paymentRepository.findByIdAndCompanyId(1, companyId)).thenReturn(Optional.of(payment));
         when(paymentMapper.toDTO(payment)).thenReturn(dto);
@@ -72,8 +84,10 @@ class PaymentServiceTest {
 
     @Test
     void getPaymentByRideId_ReturnsDTO() {
-        Payment payment = new Payment(); payment.setId(2);
-        PaymentDTO dto = new PaymentDTO(); dto.setId(2);
+        Payment payment = new Payment();
+        payment.setId(2);
+        PaymentDTO dto = new PaymentDTO();
+        dto.setId(2);
 
         when(paymentRepository.findByCompanyIdAndRideId(companyId, 10)).thenReturn(payment);
         when(paymentMapper.toDTO(payment)).thenReturn(dto);
@@ -85,8 +99,10 @@ class PaymentServiceTest {
 
     @Test
     void getPaymentsByCompanyAndUserId_ReturnsList() {
-        Payment payment = new Payment(); payment.setId(4);
-        PaymentDTO dto = new PaymentDTO(); dto.setId(4);
+        Payment payment = new Payment();
+        payment.setId(4);
+        PaymentDTO dto = new PaymentDTO();
+        dto.setId(4);
 
         when(paymentRepository.findByCompanyIdAndUserId(companyId, 100)).thenReturn(List.of(payment));
         when(paymentMapper.toDTO(payment)).thenReturn(dto);
@@ -99,8 +115,10 @@ class PaymentServiceTest {
 
     @Test
     void getPaymentsByCompanyAndStatus_ValidStatus_ReturnsList() {
-        Payment payment = new Payment(); payment.setId(7);
-        PaymentDTO dto = new PaymentDTO(); dto.setId(7);
+        Payment payment = new Payment();
+        payment.setId(7);
+        PaymentDTO dto = new PaymentDTO();
+        dto.setId(7);
 
         when(paymentRepository.findByCompanyIdAndPaymentStatus(companyId, PaymentStatus.PENDING))
                 .thenReturn(List.of(payment));
@@ -122,9 +140,20 @@ class PaymentServiceTest {
 
     @Test
     void createPayment_SavesEntityAndReturnsDTO() {
-        PaymentDTO dto = new PaymentDTO(); dto.setId(10);
-        Payment payment = new Payment(); payment.setId(10);
+        PaymentDTO dto = new PaymentDTO();
+        dto.setId(10);
+        dto.setRideId(20);
 
+        Payment payment = new Payment();
+        payment.setId(10);
+
+        Ride ride = new Ride();
+        User passenger = new User();
+        passenger.setId(55);
+        ride.setPassenger(passenger);
+
+        when(paymentRepository.findByCompanyIdAndRideId(companyId, 20)).thenReturn(null); // Simulate no existing payment
+        when(rideRepo.findById(20)).thenReturn(Optional.of(ride)); // Mock ride lookup
         when(paymentMapper.toEntity(dto)).thenReturn(payment);
         when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
         when(paymentMapper.toDTO(payment)).thenReturn(dto);
@@ -133,12 +162,15 @@ class PaymentServiceTest {
 
         assertEquals(10, result.getId());
         assertEquals(companyId, payment.getCompany().getId());
+        assertEquals(passenger, payment.getUser()); // Verify user set from ride's passenger
     }
 
     @Test
     void deletePaymentByIdAndCompanyId_WhenExists_ReturnsTrue() {
-        Payment payment = new Payment(); payment.setId(8);
-        Company company = new Company(); company.setId(companyId);
+        Payment payment = new Payment();
+        payment.setId(8);
+        Company company = new Company();
+        company.setId(companyId);
         payment.setCompany(company);
 
         when(paymentRepository.findByIdAndCompanyId(8, companyId)).thenReturn(Optional.of(payment));

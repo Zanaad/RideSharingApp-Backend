@@ -33,6 +33,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String authHeader = request.getHeader("Authorization");
 
+
         // Validate Bearer token format
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             try {
@@ -66,4 +67,5 @@ public class JwtFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
+
 }

@@ -6,13 +6,4 @@ public enum PaymentStatus {
     FAILED,
     REFUNDED,
     CANCELLED;
-
-    public static boolean isValid(String status) {
-        try {
-            PaymentStatus.valueOf(status.toUpperCase());
-            return true;
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
-    }
 }
