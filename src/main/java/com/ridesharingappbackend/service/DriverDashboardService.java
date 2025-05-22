@@ -28,9 +28,7 @@ import org.springframework.stereotype.Service;
  * Klasa gjithashtu përmban metoda ndihmëse për të konvertuar entitetet {@link Ride} dhe {@link Vehicle}
  * në formatet e tyre përkatëse DTO {@link RideDTO} dhe {@link VehicleDTO}.
  *
- * @author [Emri juaj]
- * @version 1.0
- * @since 2025-05-22
+ *
  */
 
 @Service
