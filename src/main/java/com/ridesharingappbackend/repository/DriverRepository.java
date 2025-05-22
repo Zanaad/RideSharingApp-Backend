@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface DriverRepository extends JpaRepository<Driver, Integer> {
-    Optional<Driver> findByUserId(Integer userId);
+    Optional<Driver> findByUserId(Long userId);
 
 
     List<Driver> findByStatus(DriverStatus status);
