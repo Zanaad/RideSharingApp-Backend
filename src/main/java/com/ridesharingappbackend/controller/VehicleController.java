@@ -28,9 +28,7 @@ import java.util.List;
  * {@link VehicleService} përdoret për të deleguar logjikën e biznesit.
  * Të gjitha operacionet janë të mbrojtura dhe të kufizuara sipas {@code companyId}.
  *
- * @author [Emri juaj]
- * @version 1.0
- * @since 2025-05-22
+ *
  */
 @RestController
 @RequestMapping("/api/vehicles")
