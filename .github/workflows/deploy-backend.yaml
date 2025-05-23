@@ -30,6 +30,9 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Set image tag from Git SHA
+        run: echo "IMAGE_TAG=${GITHUB_REF##*/}-${GITHUB_SHA::7}" >> $GITHUB_ENV
+
       - name: Build backend with Maven
         run: mvn clean package -DskipTests
 
@@ -47,8 +50,8 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE_NAME:latest .
-          docker push $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE_NAME:latest
+          docker build -t $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE_NAME:$IMAGE_TAG .
+          docker push $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE_NAME:$IMAGE_TAG
 
       - name: Set up GKE credentials
         uses: google-github-actions/get-gke-credentials@v2
@@ -64,11 +67,14 @@ jobs:
           kubectl apply -f k8s/redis-deployment.yaml
           kubectl apply -f k8s/redis-service.yaml
 
-      - name: Deploy Backend
+      - name: Deploy Backend Services (first-time or updates)
         run: |
-          kubectl apply -f k8s/backend-deployment.yaml
           kubectl apply -f k8s/backend-service.yaml
           kubectl apply -f k8s/ingress.yaml
+
+      - name: Set new backend image and trigger rollout
+        run: |
+          kubectl set image deployment/$DEPLOYMENT_NAME backend=$GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE_NAME:$IMAGE_TAG --namespace $NAMESPACE
 
       - name: Verify Deployment Rollout
         run: |
