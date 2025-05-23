@@ -4,7 +4,10 @@ import com.ridesharingappbackend.dto.RatingDTO;
 import com.ridesharingappbackend.mappers.RatingMapper;
 import com.ridesharingappbackend.models.Company;
 import com.ridesharingappbackend.models.Rating;
+import com.ridesharingappbackend.models.User;
+import com.ridesharingappbackend.repository.CompanyRepository;
 import com.ridesharingappbackend.repository.RatingRepository;
+import com.ridesharingappbackend.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -21,6 +24,12 @@ class RatingServiceTest {
 
     @Mock
     private RatingMapper ratingMapper;
+    @Mock
+    private CompanyRepository companyRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
 
     @InjectMocks
     private RatingService ratingService;
@@ -103,17 +112,30 @@ class RatingServiceTest {
 
     @Test
     void createRating_SavesAndReturnsDTO() {
-        RatingDTO dto = new RatingDTO(); dto.setId(1);
-        Rating rating = new Rating(); rating.setId(1);
+        RatingDTO dto = new RatingDTO();
+        dto.setId(1);
+
+        Rating rating = new Rating();
+        rating.setId(1);
+
+        Company company = new Company();
+        company.setId(companyId);
+
+        User passenger = new User();
+        passenger.setId(100); // any sample ID
 
         when(ratingMapper.toEntity(dto)).thenReturn(rating);
+        when(companyRepository.findById(companyId)).thenReturn(Optional.of(company));
+        when(userRepository.findById(passenger.getId())).thenReturn(Optional.of(passenger));
         when(ratingRepository.save(any(Rating.class))).thenReturn(rating);
         when(ratingMapper.toDTO(rating)).thenReturn(dto);
 
-        RatingDTO result = ratingService.createRating(dto, companyId);
+        RatingDTO result = ratingService.createRating(dto, companyId, passenger.getId());
 
         assertEquals(1, result.getId());
+        verify(ratingRepository).save(any(Rating.class));
     }
+
 
     @Test
     void deleteRatingByIdAndCompanyId_WhenMatch_ReturnsTrue() {

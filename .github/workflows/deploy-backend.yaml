@@ -3,7 +3,7 @@ name: Deploy Backend to GKE
 on:
   push:
     branches:
-      - 52-deploy-to-kubernetes-cluster
+      - main
 
 jobs:
   build-and-deploy:
@@ -57,9 +57,14 @@ jobs:
 
       - name: Deploy to GKE
         run: |
-          kubectl apply -f k8s/deployment.yaml
-          kubectl apply -f k8s/service.yaml
+          kubectl apply -f k8s/backend-deployment.yaml
+          kubectl apply -f k8s/backend-service.yaml
           kubectl apply -f k8s/ingress.yaml
+          kubectl apply -f k8s/mysql-secret.yaml
+          kubectl apply -f k8s/mysql-service.yaml
+          kubectl apply -f k8s/mysql-statefulset.yaml
+          kubectl apply -f k8s/redis-deployment.yaml
+          kubectl apply -f k8s/redis-service.yaml
 
       - name: Verify Deployment Rollout
         run: |
