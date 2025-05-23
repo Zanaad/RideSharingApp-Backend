@@ -5,6 +5,10 @@ import com.ridesharingappbackend.dto.RideDTO;
 import com.ridesharingappbackend.enums.RideStatus;
 import com.ridesharingappbackend.service.RatingService;
 import com.ridesharingappbackend.service.RideService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +27,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/rides")
+@Tag(name = "Rides", description = "Operations related to ride booking and management")
 public class RideController {
 
     private final RideService rideService;
@@ -39,6 +44,7 @@ public class RideController {
      * @param request objekti HttpServletRequest që përmban atributin "companyId".
      * @return lista e të gjitha udhëtimeve për kompaninë.
      */
+    @Operation(summary = "Get all rides for the current company")
     @GetMapping
     public List<RideDTO> getAllRides(HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
@@ -52,6 +58,11 @@ public class RideController {
      * @param request objekti që përmban "companyId".
      * @return udhëtimi nëse ekziston, përndryshe 404.
      */
+    @Operation(summary = "Get ride by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ride found"),
+            @ApiResponse(responseCode = "404", description = "Ride not found")
+    })
     @GetMapping("/{id}")
     public ResponseEntity<RideDTO> getRideById(@PathVariable Integer id, HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
@@ -66,6 +77,7 @@ public class RideController {
      * @param request përmban "userId" dhe "companyId".
      * @return lista e udhëtimeve të pasagjerit.
      */
+    @Operation(summary = "Get rides for the current passenger")
     @GetMapping("/my-rides")
     public List<RideDTO> getMyRides(HttpServletRequest request) {
         Integer passengerId = (Integer) request.getAttribute("userId");
@@ -79,6 +91,7 @@ public class RideController {
      * @param request që përmban "companyId".
      * @return lista e udhëtimeve të kompanisë.
      */
+    @Operation(summary = "Get all rides by company")
     @GetMapping("/company")
     public List<RideDTO> getRidesByCompany(HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
@@ -92,6 +105,7 @@ public class RideController {
      * @param request që përmban "companyId".
      * @return lista e udhëtimeve me statusin e caktuar.
      */
+    @Operation(summary = "Get rides by status for a company")
     @GetMapping("/company/status/{status}")
     public List<RideDTO> getRidesByCompanyAndStatus(@PathVariable RideStatus status, HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
@@ -105,6 +119,7 @@ public class RideController {
      * @param request që përmban "companyId".
      * @return lista e udhëtimeve për drejtuesin në fjalë.
      */
+    @Operation(summary = "Get rides by driver for a company")
     @GetMapping("/company/driver/{driverId}")
     public List<RideDTO> getRidesByCompanyAndDriver(@PathVariable Integer driverId, HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
@@ -118,6 +133,11 @@ public class RideController {
      * @param request që përmban "companyId" dhe "userId".
      * @return udhëtimi i sapo krijuar.
      */
+    @Operation(summary = "Book a new ride")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Ride created"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     @PostMapping
     public ResponseEntity<RideDTO> bookRide(@RequestBody RideDTO rideDTO, HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
@@ -138,6 +158,11 @@ public class RideController {
      * @param request që përmban "companyId".
      * @return 204 nëse fshihet me sukses, 404 nëse nuk gjendet.
      */
+    @Operation(summary = "Delete a ride by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Ride deleted"),
+            @ApiResponse(responseCode = "404", description = "Ride not found")
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRide(@PathVariable Integer id, HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
@@ -151,10 +176,11 @@ public class RideController {
      * @param request që përmban "userId" (ID e drejtuesit).
      * @return lista e udhëtimeve që ka kryer drejtuesi.
      */
+    @Operation(summary = "Get ride history for a driver")
     @GetMapping("/my")
     public ResponseEntity<List<RideDTO>> getMyRideHistory(HttpServletRequest request) {
         Integer driverId = (int) request.getAttribute("userId");
-        System.out.println("DriverId from request: " + driverId);  // Kontroll
+        System.out.println("DriverId from request: " + driverId); // Kontroll
 
         if (driverId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
@@ -172,6 +198,11 @@ public class RideController {
      * @param request që përmban "userId" (ID e përdoruesit që e përditëson).
      * @return mesazh suksesi ose gabimi.
      */
+    @Operation(summary = "Update ride status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Status updated"),
+            @ApiResponse(responseCode = "400", description = "Invalid request")
+    })
     @PutMapping("/{id}/status")
     public ResponseEntity<String> updateRideStatus(
             @PathVariable Integer id,

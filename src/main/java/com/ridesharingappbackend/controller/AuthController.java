@@ -8,6 +8,10 @@ import com.ridesharingappbackend.models.User;
 import com.ridesharingappbackend.repository.CompanyRepository;
 import com.ridesharingappbackend.repository.UserRepository;
 import com.ridesharingappbackend.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Authentication", description = "Endpoints for user authentication and password management")
 public class AuthController {
 
     private final AuthService authService;
@@ -45,6 +50,12 @@ public class AuthController {
      * @return AuthResponse që përmban token-in JWT dhe të dhënat e përdoruesit.
      * @throws ResourceNotFoundException nëse kompania nuk gjendet në bazën e të dhënave.
      */
+    @Operation(summary = "User signup", description = "Register a new user for a company identified by X-Company-Domain header")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User successfully registered"),
+            @ApiResponse(responseCode = "404", description = "Company not found"),
+            @ApiResponse(responseCode = "409", description = "User already registered")
+    })
     @PostMapping("/signup")
     public ResponseEntity<AuthResponse> signup(@RequestBody SignupRequest request, @RequestHeader("X-Company-Domain") String companyDomain) {
         Company company = companyRepo.findByDomain(companyDomain).orElseThrow(() -> new ResourceNotFoundException("Company not found"));
@@ -63,6 +74,13 @@ public class AuthController {
      * @throws ResourceNotFoundException nëse përdoruesi ose kompania nuk gjenden.
      * @throws BadRequestException nëse mungon companyDomain për përdoruesit që nuk janë SuperAdmin.
      */
+    @Operation(summary = "User login", description = "Authenticate user with email and password. X-Company-Domain header is required unless logging in as SuperAdmin")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Login successful"),
+            @ApiResponse(responseCode = "400", description = "Company domain is required"),
+            @ApiResponse(responseCode = "404", description = "User or company not found"),
+            @ApiResponse(responseCode = "401", description = "Invalid credentials")
+    })
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request, @RequestHeader(value = "X-Company-Domain", required = false) String companyDomain) {
         User user = userRepo.findByEmail(request.getEmail())
@@ -89,6 +107,11 @@ public class AuthController {
      * @param request përmban email-in e përdoruesit dhe domain-in e kompanisë.
      * @return përgjigje e suksesshme nëse linku u dërgua me sukses.
      */
+    @Operation(summary = "Initiate password reset", description = "Send password reset link to the user's email")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Reset link sent"),
+            @ApiResponse(responseCode = "404", description = "User or company not found")
+    })
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
         authService.initiatePasswordReset(request.getEmail(), request.getCompanyDomain());
@@ -101,6 +124,11 @@ public class AuthController {
      * @param request përmban token-in dhe fjalëkalimin e ri.
      * @return mesazh suksesi nëse fjalëkalimi u ndryshua me sukses.
      */
+    @Operation(summary = "Reset password", description = "Reset user's password using a valid reset token")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Password successfully changed"),
+            @ApiResponse(responseCode = "400", description = "Invalid or expired token")
+    })
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
         authService.resetPassword(request.getToken(), request.getNewPassword());
