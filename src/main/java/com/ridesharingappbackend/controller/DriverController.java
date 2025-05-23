@@ -10,6 +10,21 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
+
+/**
+ * DriverController ofron API endpoint-e për menaxhimin e shoferëve (drivers)
+ * të një kompanie të caktuar në sistemin e ride-sharing.
+ *
+ * Të gjitha metodat marrin `companyId` nga `HttpServletRequest` për të siguruar
+ * izolim të të dhënave sipas kompanisë.
+ *
+ * Endpoint-et përfshijnë:
+ * - Marrjen e të gjithë shoferëve
+ * - Marrjen e një shoferi sipas ID-së
+ * - Krijimin e një shoferi të ri
+ * - Përditësimin e një shoferi ekzistues
+ * - Fshirjen e një shoferi
+ */
 @RestController
 @RequestMapping("/api/drivers")
 public class DriverController {
@@ -20,7 +35,12 @@ public class DriverController {
         this.driverService = driverService;
     }
 
-
+    /**
+     * Kthen listën e të gjithë shoferëve që i përkasin kompanisë së kërkesës.
+     *
+     * @param request HttpServletRequest që përmban `companyId` si atribut.
+     * @return lista e shoferëve të kompanisë, ose 500 INTERNAL_SERVER_ERROR në rast gabimi.
+     */
     @GetMapping
     public ResponseEntity<List<DriverDTO>> getAllDrivers(HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
@@ -33,6 +53,13 @@ public class DriverController {
         }
     }
 
+    /**
+     * Gjen një shofer sipas ID-së brenda kompanisë së kërkesës.
+     *
+     * @param id ID-ja e shoferit që kërkohet.
+     * @param request HttpServletRequest që përmban `companyId`.
+     * @return shoferi nëse gjendet, ose 404 NOT_FOUND ose 500 INTERNAL_SERVER_ERROR në rast gabimi.
+     */
     @GetMapping("/{id}")
     public ResponseEntity<DriverDTO> getDriverById(@PathVariable Integer id, HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
@@ -47,6 +74,13 @@ public class DriverController {
         }
     }
 
+    /**
+     * Krijon një shofer të ri për kompaninë e kërkesës.
+     *
+     * @param dto objekti `DriverDTO` me të dhënat e shoferit për krijim.
+     * @param request HttpServletRequest që përmban `companyId`.
+     * @return shoferi i krijuar, ose 500 INTERNAL_SERVER_ERROR në rast gabimi.
+     */
     @PostMapping
     public ResponseEntity<DriverDTO> createDriver(@RequestBody DriverDTO dto, HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
@@ -58,6 +92,14 @@ public class DriverController {
         }
     }
 
+    /**
+     * Përditëson të dhënat e një shoferi ekzistues sipas ID-së dhe kompanisë.
+     *
+     * @param id ID-ja e shoferit që do të përditësohet.
+     * @param dto objekt `DriverDTO` me të dhënat e reja.
+     * @param request HttpServletRequest që përmban `companyId`.
+     * @return shoferi i përditësuar, ose 404 NOT_FOUND nëse nuk ekziston, ose 500 INTERNAL_SERVER_ERROR në rast gabimi.
+     */
     @PutMapping("/{id}")
     public ResponseEntity<DriverDTO> updateDriver(@PathVariable Integer id, @RequestBody DriverDTO dto, HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
@@ -69,6 +111,13 @@ public class DriverController {
         }
     }
 
+    /**
+     * Fshin një shofer sipas ID-së dhe `companyId` të kërkesës.
+     *
+     * @param id ID-ja e shoferit që do të fshihet.
+     * @param request HttpServletRequest që përmban `companyId`.
+     * @return status 204 NO_CONTENT nëse suksesshëm, ose 404 NOT_FOUND nëse nuk ekziston.
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDriver(@PathVariable Integer id, HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
@@ -79,5 +128,4 @@ public class DriverController {
             return ResponseEntity.notFound().build();
         }
     }
-
 }
