@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -72,16 +71,5 @@ public class RedisConfig {
     public RedisConnectionFactory redisConnectionFactory(@Value("${spring.redis.host}") String redisHost, @Value("${spring.redis.port}") int redisPort) {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(redisHost, redisPort);
         return new LettuceConnectionFactory(config);
-    }
-
-    @Value("${spring.redis.host}")
-    private String redisHost;
-
-    @Value("${spring.redis.port}")
-    private int redisPort;
-
-    @PostConstruct
-    public void logRedisConnectionInfo() {
-        System.out.println("RedisConfig initialized with host: " + redisHost + ", port: " + redisPort);
     }
 }
