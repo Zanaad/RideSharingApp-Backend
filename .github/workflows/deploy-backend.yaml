@@ -15,7 +15,7 @@ jobs:
       REPO_NAME: ridesharing-docker-repo
       IMAGE_NAME: backend
       CLUSTER_NAME: ridesharing-cluster
-      CLUSTER_ZONE: europe-west3-a
+      CLUSTER_ZONE: europe-west3
       DEPLOYMENT_NAME: ridesharing-backend
       NAMESPACE: default
 

@@ -53,4 +53,19 @@ public class NotificationsController {
         NotificationsDTO updated = notificationService.markAsRead(id, companyId);
         return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
     }
+
+    @GetMapping("/user")
+    public List<NotificationsDTO> getNotificationsByUser(
+            @RequestParam Integer userId,
+            @RequestParam Integer companyId) {
+        return notificationService.getNotificationsByUser(userId, companyId);
+    }
+
+    @GetMapping("/user/unread")
+    public List<NotificationsDTO> getUnreadNotificationsByUser(
+            @RequestParam Integer userId,
+            @RequestParam Integer companyId) {
+        return notificationService.getUnreadNotificationsByUser(userId, companyId);
+    }
+
 }
