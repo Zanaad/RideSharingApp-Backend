@@ -179,9 +179,8 @@ public class RideController {
     @Operation(summary = "Get ride history for a driver")
     @GetMapping("/my")
     public ResponseEntity<List<RideDTO>> getMyRideHistory(HttpServletRequest request) {
-        Integer driverId = (int) request.getAttribute("userId");
-        System.out.println("DriverId from request: " + driverId); // Kontroll
 
+        Integer driverId = (Integer) request.getAttribute("userId");  // Mos e kasto në int
         if (driverId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
@@ -189,6 +188,7 @@ public class RideController {
         List<RideDTO> rides = rideService.getRidesByDriver(driverId);
         return ResponseEntity.ok(rides);
     }
+
 
     /**
      * Përditëson statusin e një udhëtimi (p.sh. në 'IN_PROGRESS' ose 'COMPLETED').
@@ -203,6 +203,7 @@ public class RideController {
             @ApiResponse(responseCode = "200", description = "Status updated"),
             @ApiResponse(responseCode = "400", description = "Invalid request")
     })
+
     @PutMapping("/{id}/status")
     public ResponseEntity<String> updateRideStatus(
             @PathVariable Integer id,
@@ -223,5 +224,12 @@ public class RideController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Could not update ride status");
         }
     }
+    @PutMapping("/cancel/{id}")
+    public ResponseEntity<Void> cancelRide(@PathVariable Integer id, HttpServletRequest request) {
+        Integer companyId = (Integer) request.getAttribute("companyId");
+        Integer userId = (Integer) request.getAttribute("userId");
 
+        boolean cancelled = rideService.cancelRide(id, companyId, userId);
+        return cancelled ? ResponseEntity.ok().build() : ResponseEntity.badRequest().build();
+    }
 }

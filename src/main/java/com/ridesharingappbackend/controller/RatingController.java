@@ -1,7 +1,6 @@
 package com.ridesharingappbackend.controller;
 
 import com.ridesharingappbackend.dto.RatingDTO;
-import com.ridesharingappbackend.dto.RideDTO;
 import com.ridesharingappbackend.service.RatingService;
 import com.ridesharingappbackend.service.RideService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,7 +46,7 @@ public class RatingController {
 
     public RatingController(RatingService ratingService, RideService rideService) {
         this.ratingService = ratingService;
-        this.rideService=rideService;
+        this.rideService = rideService;
     }
     @Operation(summary = "Get all ratings for a company")
     @ApiResponses({
@@ -103,9 +102,16 @@ public class RatingController {
             @ApiResponse(responseCode = "201", description = "Rating created successfully")
     })
     @PostMapping
-    public RatingDTO createRating(@RequestBody RatingDTO ratingDTO, HttpServletRequest request) {
+    public ResponseEntity<RatingDTO> createRating(@RequestBody RatingDTO ratingDTO, HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
-        return ratingService.createRating(ratingDTO, companyId);
+        Integer passengerId = (Integer) request.getAttribute("userId");
+
+        if (companyId == null || passengerId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        RatingDTO createdRating = ratingService.createRating(ratingDTO, companyId, passengerId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdRating);
     }
     @Operation(summary = "Delete a rating by ID")
     @ApiResponses({
@@ -120,16 +126,16 @@ public class RatingController {
         }
         return ResponseEntity.notFound().build();
     }
+
     @Operation(summary = "Get ratings submitted for the logged-in driver")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Driver's ratings fetched"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
+
     @GetMapping("/my")
     public ResponseEntity<List<RatingDTO>> getMyRatings(HttpServletRequest request) {
         Integer driverId = (Integer) request.getAttribute("userId");
-        System.out.println("DriverId from request: " + driverId);
-
         if (driverId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
