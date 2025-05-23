@@ -2,8 +2,9 @@ name: Deploy Backend to GKE
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build-and-deploy:
@@ -55,16 +56,19 @@ jobs:
           cluster_name: ${{ env.CLUSTER_NAME }}
           location: ${{ env.CLUSTER_ZONE }}
 
-      - name: Deploy to GKE
+      - name: Deploy MySQL and Redis
         run: |
-          kubectl apply -f k8s/backend-deployment.yaml
-          kubectl apply -f k8s/backend-service.yaml
-          kubectl apply -f k8s/ingress.yaml
           kubectl apply -f k8s/mysql-secret.yaml
           kubectl apply -f k8s/mysql-service.yaml
           kubectl apply -f k8s/mysql-statefulset.yaml
           kubectl apply -f k8s/redis-deployment.yaml
           kubectl apply -f k8s/redis-service.yaml
+
+      - name: Deploy Backend
+        run: |
+          kubectl apply -f k8s/backend-deployment.yaml
+          kubectl apply -f k8s/backend-service.yaml
+          kubectl apply -f k8s/ingress.yaml
 
       - name: Verify Deployment Rollout
         run: |
