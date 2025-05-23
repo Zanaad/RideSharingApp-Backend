@@ -45,7 +45,8 @@ public class SecurityConfig {
                                 "/api/auth/forgot-password",
                                 "/api/auth/reset-password",
                                 "/swagger-ui/**",
-                                "/swagger-ui.html"
+                                "/swagger-ui.html",
+                                "/api/health"
                         ).permitAll() // Allow these endpoints without auth
                         .anyRequest().authenticated() // Require auth for everything else
                 )
