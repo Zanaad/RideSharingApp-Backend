@@ -86,8 +86,7 @@ public class RideController {
     }
     @GetMapping("/my")
     public ResponseEntity<List<RideDTO>> getMyRideHistory(HttpServletRequest request) {
-        Integer driverId = (int) request.getAttribute("userId");
-        System.out.println("DriverId from request: " + driverId);  // Kontroll
+        Integer driverId = (Integer) request.getAttribute("userId");  // Mos e kasto në int
 
         if (driverId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
@@ -96,6 +95,7 @@ public class RideController {
         List<RideDTO> rides = rideService.getRidesByDriver(driverId);
         return ResponseEntity.ok(rides);
     }
+
 
     @PutMapping("/{id}/status")
     public ResponseEntity<String> updateRideStatus(
