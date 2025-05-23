@@ -1,9 +1,11 @@
 package com.ridesharingappbackend.service;
 
 import com.ridesharingappbackend.dto.NotificationsDTO;
+import com.ridesharingappbackend.enums.NotificationType;
 import com.ridesharingappbackend.mappers.NotificationsMapper;
 import com.ridesharingappbackend.models.Company;
 import com.ridesharingappbackend.models.Notifications;
+import com.ridesharingappbackend.models.User;
 import com.ridesharingappbackend.repository.NotificationsRepository;
 import org.springframework.stereotype.Service;
 
@@ -56,4 +58,29 @@ public class NotificationsService {
                 })
                 .orElse(null);
     }
+
+    public void notifyUser(User user, Company company, String message, NotificationType type) {
+        Notifications notification = new Notifications();
+        notification.setUser(user);
+        notification.setCompany(company);
+        notification.setMessage(message);
+        notification.setType(type);
+        notification.setIsRead(false);
+        notificationRepository.save(notification);
+    }
+
+    public List<NotificationsDTO> getNotificationsByUser(Integer userId, Integer companyId) {
+        return notificationRepository.findByUserIdAndCompanyId(userId, companyId)
+                .stream()
+                .map(mapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<NotificationsDTO> getUnreadNotificationsByUser(Integer userId, Integer companyId) {
+        return notificationRepository.findByUserIdAndCompanyIdAndIsReadFalse(userId, companyId)
+                .stream()
+                .map(mapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
 }

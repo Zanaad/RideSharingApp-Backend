@@ -45,6 +45,8 @@ class RideServiceTest {
 
     @Mock
     private DriverRepository driverRepository;
+    @Mock
+    private NotificationsService notificationsService;
 
     @BeforeEach
     void setUp() {
@@ -186,7 +188,6 @@ class RideServiceTest {
         assertEquals(driver, ride.getDriver());
         assertEquals(RideStatus.ACCEPTED, ride.getStatus());
     }
-
 
 
     @Test

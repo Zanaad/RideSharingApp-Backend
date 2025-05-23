@@ -1,7 +1,6 @@
 package com.ridesharingappbackend.controller;
 
 import com.ridesharingappbackend.dto.RatingDTO;
-import com.ridesharingappbackend.dto.RideDTO;
 import com.ridesharingappbackend.service.RatingService;
 import com.ridesharingappbackend.service.RideService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,7 +19,7 @@ public class RatingController {
 
     public RatingController(RatingService ratingService, RideService rideService) {
         this.ratingService = ratingService;
-        this.rideService=rideService;
+        this.rideService = rideService;
     }
 
     @GetMapping
@@ -56,9 +55,16 @@ public class RatingController {
     }
 
     @PostMapping
-    public RatingDTO createRating(@RequestBody RatingDTO ratingDTO, HttpServletRequest request) {
+    public ResponseEntity<RatingDTO> createRating(@RequestBody RatingDTO ratingDTO, HttpServletRequest request) {
         Integer companyId = (Integer) request.getAttribute("companyId");
-        return ratingService.createRating(ratingDTO, companyId);
+        Integer passengerId = (Integer) request.getAttribute("userId");
+
+        if (companyId == null || passengerId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        RatingDTO createdRating = ratingService.createRating(ratingDTO, companyId, passengerId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdRating);
     }
 
     @DeleteMapping("/{id}")
@@ -69,11 +75,10 @@ public class RatingController {
         }
         return ResponseEntity.notFound().build();
     }
+
     @GetMapping("/my")
     public ResponseEntity<List<RatingDTO>> getMyRatings(HttpServletRequest request) {
         Integer driverId = (Integer) request.getAttribute("userId");
-        System.out.println("DriverId from request: " + driverId);
-
         if (driverId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }

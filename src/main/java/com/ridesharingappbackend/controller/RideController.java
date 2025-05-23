@@ -117,5 +117,12 @@ public class RideController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Could not update ride status");
         }
     }
+    @PutMapping("/cancel/{id}")
+    public ResponseEntity<Void> cancelRide(@PathVariable Integer id, HttpServletRequest request) {
+        Integer companyId = (Integer) request.getAttribute("companyId");
+        Integer userId = (Integer) request.getAttribute("userId");
 
+        boolean cancelled = rideService.cancelRide(id, companyId, userId);
+        return cancelled ? ResponseEntity.ok().build() : ResponseEntity.badRequest().build();
+    }
 }

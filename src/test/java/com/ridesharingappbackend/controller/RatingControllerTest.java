@@ -6,15 +6,19 @@ import com.ridesharingappbackend.service.RideService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-import java.time.LocalDateTime;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class RatingControllerTest {
 
@@ -133,11 +137,14 @@ class RatingControllerTest {
     void createRating_success() {
         RatingDTO input = createSampleRating();
         when(request.getAttribute("companyId")).thenReturn(1);
-        when(ratingService.createRating(input, 1)).thenReturn(input);
+        when(request.getAttribute("userId")).thenReturn(200); // Mock the passengerId
 
-        RatingDTO response = ratingController.createRating(input, request);
+        when(ratingService.createRating(input, 1, 200)).thenReturn(input);
 
-        assertEquals(input, response);
+        ResponseEntity<RatingDTO> response = ratingController.createRating(input, request);
+
+        assertEquals(201, response.getStatusCodeValue());
+        assertEquals(input, response.getBody());
     }
 
     @Test

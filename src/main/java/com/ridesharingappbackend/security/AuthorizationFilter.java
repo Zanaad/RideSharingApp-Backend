@@ -36,7 +36,8 @@ public class AuthorizationFilter extends OncePerRequestFilter {
                 path.startsWith("/v3/api-docs") ||
                 path.equals("/swagger-ui.html") ||
                 path.equals("/api/companies") ||
-                path.startsWith("/api/companies/domain")
+                path.startsWith("/api/companies/domain") ||
+                path.equals("/api/health")
         ) {
             filterChain.doFilter(request, response);
             return;
@@ -48,7 +49,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
             ErrorResponseWriter.write(response, HttpStatus.UNAUTHORIZED, "Authentication required.");
             return;
         }
-        
+
 
         // Extract role and HTTP method, then check access control
         Integer roleId = claims.get("roleId", Integer.class);
