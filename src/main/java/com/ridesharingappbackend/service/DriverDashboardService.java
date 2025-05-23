@@ -16,6 +16,20 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * Shërbim që menaxhon logjikën e biznesit për dashboard-in e shoferit në aplikacionin e ndarjes së udhëtimeve.
+ *
+ * Kjo klasë siguron të dhëna të personalizuara për dashboard-in e një shoferi,
+ * duke përfshirë emrin e plotë, statusin, vlerësimin, dhe informacionin e automjetit.
+ *
+ * Metoda kryesore {@link #getDashboardByUserId(Integer)} përdoret për të ndërtuar
+ * një objekt {@link com.ridesharingappbackend.dto.DriverDashboardDTO} në bazë të një userId të dhënë.
+ *
+ * Klasa gjithashtu përmban metoda ndihmëse për të konvertuar entitetet {@link Ride} dhe {@link Vehicle}
+ * në formatet e tyre përkatëse DTO {@link RideDTO} dhe {@link VehicleDTO}.
+ *
+ *
+ */
 
 @Service
 @RequiredArgsConstructor

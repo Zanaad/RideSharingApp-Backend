@@ -10,6 +10,26 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Shërbim që menaxhon logjikën e biznesit për entitetin {@link Vehicle} në aplikacionin e ndarjes së udhëtimeve.
+ *
+ * Ky shërbim ofron metoda për:
+ * <ul>
+ *   <li>Marrjen e të gjitha automjeteve që i përkasin një kompanie specifike</li>
+ *   <li>Gjetjen e një automjeti sipas ID-së dhe kompanisë</li>
+ *   <li>Gjetjen e automjetit për një shofer të caktuar brenda kompanisë</li>
+ *   <li>Krijimin e një automjeti të ri</li>
+ *   <li>Përditësimin e të dhënave të një automjeti ekzistues</li>
+ *   <li>Fshirjen e një automjeti</li>
+ * </ul>
+ *
+ * Përdor {@link VehicleRepository} për ndërveprim me shtresën e të dhënave dhe
+ * {@link VehicleMapper} për transformim midis entiteteve dhe DTO-ve.
+ *
+ * Të gjitha operacionet janë të kufizuara brenda kontekstit të një kompanie përmes kontrollit të {@code companyId}.
+ *
+ */
+
 @Service
 public class VehicleService {
 

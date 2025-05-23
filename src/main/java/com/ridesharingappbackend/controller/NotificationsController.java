@@ -2,14 +2,33 @@ package com.ridesharingappbackend.controller;
 
 import com.ridesharingappbackend.dto.NotificationsDTO;
 import com.ridesharingappbackend.service.NotificationsService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * NotificationsController ofron endpoint-e REST për menaxhimin e njoftimeve (notifications)
+ * që i përkasin një kompanie të caktuar.
+ *
+ * Të gjitha operacionet kërkojnë ID-në e kompanisë si parametër (`companyId`)
+ * për të garantuar që njoftimet janë të izoluara sipas kompanisë.
+ *
+ * Endpoint-et përfshijnë:
+ * - Listimin e të gjitha njoftimeve
+ * - Gjetjen e një njoftimi sipas ID-së
+ * - Krijimin e një njoftimi të ri
+ * - Fshirjen e një njoftimi ekzistues
+ * - Shënimin e një njoftimi si të lexuar
+ */
 @RestController
 @RequestMapping("/api/notifications")
+@Tag(name = "Notifications", description = "Manage notifications")
 public class NotificationsController {
 
     private final NotificationsService notificationService;
@@ -18,11 +37,31 @@ public class NotificationsController {
         this.notificationService = notificationService;
     }
 
+    /**
+     * Kthen listën e të gjitha njoftimeve për një kompani të caktuar.
+     *
+     * @param companyId ID-ja e kompanisë për të cilën kërkohen njoftimet.
+     * @return lista e njoftimeve në formën e DTO-ve.
+     */
+    @Operation(summary = "Get all notifications for a company")
+    @ApiResponse(responseCode = "200", description = "List of notifications returned")
     @GetMapping
     public List<NotificationsDTO> getAllNotifications(@RequestParam Integer companyId) {
         return notificationService.getAllNotifications(companyId);
     }
 
+    /**
+     * Kthen një njoftim sipas ID-së për një kompani të caktuar.
+     *
+     * @param id ID-ja e njoftimit.
+     * @param companyId ID-ja e kompanisë që posedon njoftimin.
+     * @return objekti NotificationsDTO nëse gjendet, përndryshe 404 NOT_FOUND.
+     */
+    @Operation(summary = "Get notification by ID for a company")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Notification returned"),
+            @ApiResponse(responseCode = "404", description = "Notification not found")
+    })
     @GetMapping("/{id}")
     public ResponseEntity<NotificationsDTO> getNotificationById(
             @PathVariable Integer id,
@@ -31,6 +70,15 @@ public class NotificationsController {
         return notification.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
+    /**
+     * Krijon një njoftim të ri për një kompani të caktuar.
+     *
+     * @param dto objekti DTO që përmban të dhënat e njoftimit.
+     * @param companyId ID-ja e kompanisë që do ta zotërojë njoftimin.
+     * @return objekti NotificationsDTO i krijuar.
+     */
+    @Operation(summary = "Create a new notification for a company")
+    @ApiResponse(responseCode = "200", description = "Notification created successfully")
     @PostMapping
     public NotificationsDTO createNotification(
             @RequestBody NotificationsDTO dto,
@@ -38,6 +86,18 @@ public class NotificationsController {
         return notificationService.createNotification(dto, companyId);
     }
 
+    /**
+     * Fshin një njoftim specifik për një kompani të caktuar.
+     *
+     * @param id ID-ja e njoftimit që do të fshihet.
+     * @param companyId ID-ja e kompanisë që posedon njoftimin.
+     * @return 204 NO_CONTENT nëse fshihet me sukses.
+     */
+    @Operation(summary = "Delete a notification by ID for a company")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Notification deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Notification not found")
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteNotification(
             @PathVariable Integer id,
@@ -46,6 +106,18 @@ public class NotificationsController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Shenon një njoftim si të lexuar për një kompani të caktuar.
+     *
+     * @param id ID-ja e njoftimit që do të shënohet si i lexuar.
+     * @param companyId ID-ja e kompanisë që posedon njoftimin.
+     * @return objekti i përditësuar NotificationsDTO nëse ekziston, përndryshe 404 NOT_FOUND.
+     */
+    @Operation(summary = "Mark a notification as read by ID for a company")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Notification marked as read"),
+            @ApiResponse(responseCode = "404", description = "Notification not found")
+    })
     @PutMapping("/{id}/read")
     public ResponseEntity<NotificationsDTO> markAsRead(
             @PathVariable Integer id,
